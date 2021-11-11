@@ -9,7 +9,7 @@ var consumptionDistribution = gaussian(11, 2);
 update();
 
 app.get('/', (req, res) => {
-    res.send(getConsumption().toString());
+    res.json(getConsumption());
 })
 
 app.listen(port, () => {
