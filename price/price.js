@@ -24,7 +24,8 @@ app.get('/', (req, res) => {
     });
     price = consumption * 100 - windSpeed * 5;
 
-    res.send("Windspeed is: " + windSpeed + " Consumption is: " + consumption + " And price is: " + price);
+    res.json(price.toFixed(2));
+    // res.send("Windspeed is: " + windSpeed + " Consumption is: " + consumption + " And price is: " + price);
 })
 
 app.listen(port, () => {
