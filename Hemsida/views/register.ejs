@@ -22,19 +22,22 @@
     </nav>
 
     <div class="container col-5 mt-5">
-        <h2>Login</h2>
+        <h2>Register New Account</h2>
         <form method="post">
             <div class="mb-3">
-                <label for="exampleFormControlInput1" class="form-label">Username</label>
-                <input type="text" name="username" class="form-control" id="exampleFormControlInput1" placeholder="username">
+                <label for="registerUsername" class="form-label">Username</label>
+                <input type="text" name="registerUsername" class="form-control" id="registerUsername" placeholder="username">
             </div>
             <div class="mb-3">
-                <label for="exampleFormControlInput2" class="form-label">Password</label>
-                <input type="password" name="password" class="form-control" id="exampleFormControlInput2" placeholder="password">
+                <label for="registerPassword" class="form-label">Password</label>
+                <input type="password" name="registerPassword" class="form-control" id="registerPassword" placeholder="password">
             </div>
-            <button type="submit" class="btn btn-primary">Sign in</button>
+            <div class="mb-3">
+                <label for="registerPassword2" class="form-label">Confirm Password</label>
+                <input type="password" name="registerPassword2" class="form-control" id="registerPassword2" placeholder="password">
+            </div>
+            <button type="submit" class="btn btn-primary">Register</button>
         </form>
-        <button class="btn btn-primary">Register</button>
     </div>
 
 
