@@ -69,6 +69,7 @@ app.post('/redirectlogin', (req,res) => {
     res.redirect('/login')
 })
 app.get('/logout', (req,res) => {
+    req.session.loggedin = false
     res.redirect('/login')
 })
 app.get('/login', (req, res) => {
