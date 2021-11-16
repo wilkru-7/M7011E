@@ -65,7 +65,9 @@ app.post('/login', (req,res) => {
 app.post('/redirectregister', (req,res) => {
     res.redirect('/register')
 })
-
+app.post('/redirectlogin', (req,res) => {
+    res.redirect('/login')
+})
 app.get('/login', (req, res) => {
     res.render('login', {})
 })
