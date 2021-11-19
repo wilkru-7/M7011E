@@ -4,6 +4,7 @@ var path = require('path');
 var ejs = require('ejs');
 var bodyParser = require('body-parser');
 var session = require('express-session');
+const fileUpload = require('express-fileupload');
 
 const app = express()
 const port = 3003
@@ -52,7 +53,7 @@ app.get('/', (req, res) => {
 
     buffer += netProduction;
 
-    res.render('index2', {price: price, windspeed: windspeed, consumption: consumption, production: production, netProduction: netProduction})
+    res.render('index', {price: price, windspeed: windspeed, consumption: consumption, production: production, netProduction: netProduction})
     }else{
         res.redirect("login")
     }
@@ -104,6 +105,13 @@ app.post('/register', (req, res) => {
         console.log("Something was entered wrong")
     }
     //res.render('register', {})
+})
+
+app.post('/imageupload', (req, res) => {
+    // console.log(req.files.filename);
+    if (!req.files) {
+        return res.status(400).send("No files were uploaded.");
+    }
 })
 
 app.listen(port, () => {
