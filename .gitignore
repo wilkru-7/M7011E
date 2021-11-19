@@ -2,3 +2,7 @@
 node_modules/*
 package-lock.json
 Hemsida/node_modules/*
+Consumtion/node_modules/*
+Prosumer/node_modules/*
+Windspeed/node_modules/*
+Price/node_modules/*

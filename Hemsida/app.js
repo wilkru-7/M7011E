@@ -7,7 +7,7 @@ var session = require('express-session');
 
 const app = express()
 const port = 3003
-var price, windspeed, consumption;
+var price, windspeed, consumption, production, netProduction, ratio, buffer;
 
 const { MongoClient } = require("mongodb");
 
@@ -19,7 +19,7 @@ app.use(express.urlencoded({
   }))
 
 /* TODO:
-  Change secret to something(?) */
+  Change secret to something(?)  */
 app.use(session({
 	secret: 'secret',
 	resave: true,
@@ -43,7 +43,16 @@ app.get('/', (req, res) => {
         consumption = res.body;
     });
 
-    res.render('index', {price: price, windspeed: windspeed, consumption: consumption})
+    request('http://localhost:3004/', { json: true }, (err, res, body) => {
+        if (err) { return console.log(err); }
+        production = res.body;
+    });
+
+    netProduction = (consumption - production).toFixed(2)
+
+    buffer += netProduction;
+
+    res.render('index2', {price: price, windspeed: windspeed, consumption: consumption, production: production, netProduction: netProduction})
     }else{
         res.redirect("login")
     }
@@ -59,6 +68,9 @@ app.post('/login', (req,res) => {
     if(loggedin){
         req.session.loggedin = true;
         res.redirect('/')
+    }
+    else{
+        res.redirect('login')
     }
     //console.log(username)
 })
@@ -82,12 +94,9 @@ app.post('/register', (req, res) => {
     var username = req.body.registerUsername;
     var password = req.body.registerPassword;
     var password2 = req.body.registerPassword2;
-    console.log(username)
-    console.log(password)
-    console.log(password2)
 
     var exists = search(username)
-    console.log(exists)
+
     if(exists && password==password2){
         insert(username, password)
         res.redirect('/login')
@@ -104,21 +113,33 @@ app.listen(port, () => {
 async function insert(_username, _password){
     try{
         await client.connect();
-        console.log(1)
         const database = client.db('M7011E');
-        console.log(2)
         const users = database.collection('Users');
-        console.log(3)
         const insert = { username: _username, password: _password };
-        console.log(4)
         const result =  await users.insertOne(insert);
-        console.log(5)
-        console.log(result)
     } finally{
         await client.close();
     }
 
 }
+/* async function bufferUpdate(){
+    try{
+        await client.connect();
+        const database = client.db('M7011E');
+        const users = database.collection('Users');
+        const search = { username: _username};
+        const result =  await users.findOne(search);
+        if(result != null && _password == result.password){
+            console.log("You are logged in")
+            return true
+        } else{
+            console.log("Wrong password (or wrong username)!!!")
+            return false
+        }
+    } finally{
+        await client.close();
+    }
+} */
 
 async function login(_username, _password){
     try{
@@ -146,7 +167,6 @@ async function search(_username){
         const users = database.collection('Users');
         const search = {username: _username};
         const result =  await users.findOne(search);
-        console.log(result)
         if(result == null){
             return true
         }else{

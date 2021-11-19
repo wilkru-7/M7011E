@@ -1,16 +1,17 @@
 {
-  "name": "consumtion",
+  "name": "prosumer",
   "version": "1.0.0",
-  "main": "consumption.js",
+  "description": "",
+  "main": "prosumer.js",
   "scripts": {
-    "start": "nodemon consumption.js",
+    "start": "nodemon prosumer.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.1",
-    "gaussian": "^1.2.0"
-  },
-  "description": ""
+    "nodemon": "^2.0.15",
+    "request": "^2.88.2"
+  }
 }
