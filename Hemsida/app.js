@@ -19,6 +19,14 @@ app.use(express.urlencoded({
     extended: true
   }))
 
+app.use(
+  fileUpload()
+);
+
+// app.get("/", (req, res) => {
+//     res.sendFile(path.join(__dirname, "index.html"));
+//   });
+
 /* TODO:
   Change secret to something(?)  */
 app.use(session({
@@ -108,10 +116,19 @@ app.post('/register', (req, res) => {
 })
 
 app.post('/imageupload', (req, res) => {
-    // console.log(req.files.filename);
+    console.log(req.files.filename);
     if (!req.files) {
         return res.status(400).send("No files were uploaded.");
     }
+    const file = req.files.filename;
+    const path = __dirname + "/files/" + file.name;
+
+    file.mv(path, (err) => {
+        if (err) {
+            return res.status(500).send(err);
+        }
+            return res.send({ status: "success", path: path });
+    });
 })
 
 app.listen(port, () => {
