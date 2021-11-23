@@ -101,7 +101,7 @@ app.get('/register', (req, res) => {
 })
 app.get('/admin', (req, res) => {
     users = findUsers();
-    console.log("HELLO2", users);
+    users.then(value => { console.log(value)});
 
     request('http://localhost:3002/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
@@ -237,9 +237,8 @@ async function findUsers(){
         await client.connect();
         const database = client.db('M7011E');
         const users = database.collection('Users');
-        await users.find().toArray().then(result => {return result});
-        // console.log("Users: ", result);
-        // return result;
+        result = await users.find().toArray();
+        return result;
     } finally{
         await client.close();
     }
