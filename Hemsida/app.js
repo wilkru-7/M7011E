@@ -100,8 +100,8 @@ app.get('/register', (req, res) => {
     res.render('register', {})
 })
 app.get('/admin', (req, res) => {
-    users = findUsers();
-    users.then(value => { console.log(value)});
+    // users = findUsers();
+    findUsers().then(value => { users = value});
 
     request('http://localhost:3002/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
