@@ -99,6 +99,32 @@ app.get('/login', (req, res) => {
 app.get('/register', (req, res) => {
     res.render('register', {})
 })
+app.get('/admin', (req, res) => {
+    request('http://localhost:3002/', { json: true }, (err, res, body) => {
+        if (err) { return console.log(err); }
+        price = res.body;
+    }); 
+    
+    request('http://localhost:3001/', { json: true }, (err, res, body) => {
+        if (err) { return console.log(err); }
+        windspeed = res.body;
+    });
+    request('http://localhost:3000/', { json: true }, (err, res, body) => {
+        if (err) { return console.log(err); }
+        consumption = res.body;
+    });
+
+    request('http://localhost:3004/', { json: true }, (err, res, body) => {
+        if (err) { return console.log(err); }
+        production = res.body;
+    });
+
+    netProduction = (consumption - production).toFixed(2)
+
+    buffer += netProduction;
+
+    res.render('admin', {price: price, windspeed: windspeed, consumption: consumption, production: production, netProduction: netProduction})
+})
 app.post('/register', (req, res) => {
     var username = req.body.registerUsername;
     var password = req.body.registerPassword;
