@@ -38,8 +38,13 @@
               <tr>
                 <th scope="col">#</th>
                 <th scope="col">Username</th>
-                <th scope="col">Last</th>
-                <th scope="col">Handle</th>
+                <th scope="col">Status</th>
+                <th scope="col">Consumption</th>
+                <th scope="col">Production</th>
+                <th scope="col">Buffer</th>
+                <th scope="col">Block from selling</th>
+                <th scope="col">Update credentials</th>
+                <th scope="col">Remove user</th>
               </tr>
             </thead>
             <tbody>
@@ -48,6 +53,21 @@
                     <th scrope="row"><%= i %></th>
                     <td><%= users[i].username %></td>
                     <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                        <form method="POST">
+                            <input type="hidden" name="username" value=<%= users[i].username %>>
+                            <input type="submit" value="Block">
+                        </form>
+                    </td>
+                    <td>
+                        <form method="POST">
+                            <input type="hidden" name="username" value=<%= users[i].username %>>
+                            <input type="submit" value="Update">
+                        </form>
+                    </td>
                     <td>
                         <form method="POST">
                             <input type="hidden" name="username" value=<%= users[i].username %>>
