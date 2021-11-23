@@ -37,29 +37,21 @@
             <thead class="table-light">
               <tr>
                 <th scope="col">#</th>
-                <th scope="col">First</th>
+                <th scope="col">Username</th>
                 <th scope="col">Last</th>
                 <th scope="col">Handle</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <th scope="row">1</th>
-                <td>Mark</td>
-                <td>Otto</td>
-                <td>@mdo</td>
-              </tr>
-              <tr>
-                <th scope="row">2</th>
-                <td>Jacob</td>
-                <td>Thornton</td>
-                <td>@fat</td>
-              </tr>
-              <tr>
-                <th scope="row">3</th>
-                <td colspan="2">Larry the Bird</td>
-                <td>@twitter</td>
-              </tr>
+                <h1><%= users %></h1>
+              <% for(var i=0; i<users.length; i++) {%>
+                <tr>
+                    <th scrope="row">i</th>
+                    <td><%= users[i].username %></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+              <% } %>
             </tbody>
           </table>
     </div>
@@ -142,7 +134,6 @@
                     <p>99</p>
                 </div>
             </div>
-
         </div>
     </div>
     

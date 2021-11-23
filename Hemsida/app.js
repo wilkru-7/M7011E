@@ -8,7 +8,7 @@ const fileUpload = require('express-fileupload');
 
 const app = express()
 const port = 3003
-var price, windspeed, consumption, production, netProduction, ratio, buffer;
+var price, windspeed, consumption, production, netProduction, ratio, buffer, users;
 
 const { MongoClient } = require("mongodb");
 
@@ -100,6 +100,9 @@ app.get('/register', (req, res) => {
     res.render('register', {})
 })
 app.get('/admin', (req, res) => {
+    users = findUsers();
+    console.log("HELLO2", users);
+
     request('http://localhost:3002/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         price = res.body;
@@ -123,7 +126,8 @@ app.get('/admin', (req, res) => {
 
     buffer += netProduction;
 
-    res.render('admin', {price: price, windspeed: windspeed, consumption: consumption, production: production, netProduction: netProduction})
+    
+    res.render('admin', {users: users, price: price, windspeed: windspeed, consumption: consumption, production: production, netProduction: netProduction})
 })
 app.post('/register', (req, res) => {
     var username = req.body.registerUsername;
@@ -223,6 +227,19 @@ async function search(_username){
         }else{
             return false
         }
+    } finally{
+        await client.close();
+    }
+}
+
+async function findUsers(){
+    try{
+        await client.connect();
+        const database = client.db('M7011E');
+        const users = database.collection('Users');
+        await users.find().toArray().then(result => {return result});
+        // console.log("Users: ", result);
+        // return result;
     } finally{
         await client.close();
     }
