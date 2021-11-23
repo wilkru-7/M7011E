@@ -96,60 +96,60 @@
             <!-- Kort Wind-->
             <div class="card shadow-sm mx-2 bg-light">
                 <div class="div text-center">
-                    <h6>Wind</h6>
+                    <h6>Market demand</h6>
                 </div>
                 <div class="card-body text-center">
-                    <p id="wind">
+                    <!-- <p id="wind">
                         <%= windspeed %>
-                    </p>
+                    </p> -->
                 </div>
             </div>
 
             <!-- Kort Price-->
             <div class="card shadow-sm mx-2 bg-light">
                 <div class="div text-center">
-                    <h6>Price</h6>
+                    <h6>Modelled price</h6>
                 </div>
                 <div class="card-body text-center">
-                    <p>
+                    <!-- <p>
                         <%= price %>
-                    </p>
+                    </p> -->
                 </div>
             </div>
 
             <!-- Kort consumtion -->
             <div class="card shadow-sm mx-2 bg-light">
                 <div class="div text-center">
-                    <h6>Consumtion</h6>
+                    <h6>Price</h6>
                 </div>
                 <div class="card-body text-center">
-                    <p>
+                    <!-- <p>
                         <%= consumption %>
-                    </p>
+                    </p> -->
                 </div>
             </div>
 
             <!-- Kort production -->
             <div class="card shadow-sm mx-2 bg-light">
                 <div class="div text-center">
-                    <h6>Production</h6>
+                    <h6>Electricity production</h6>
                 </div>
                 <div class="card-body text-center ">
-                    <p id="production"><%= production %></p>
+                    <!-- <p id="production"><%= production %></p> -->
                 </div>
             </div>
 
             <!-- Kort net-production -->
             <div class="card shadow-sm mx-2 bg-light">
                 <div class="div text-center">
-                    <h6>Net-production</h6>
+                    <h6>Status</h6>
                 </div>
                 <div class="card-body text-center">
-                    <p><%= netProduction %></p>
+                    <!-- <p><%= netProduction %></p> -->
                 </div>
             </div>
 
-            <!-- kort buffer -->
+            <!-- kort buffer
             <div class="card shadow-sm mx-2 bg-light">
                 <div class="div text-center">
                     <h6>Buffer</h6>
@@ -157,7 +157,7 @@
                 <div class="card-body text-center">
                     <p>99</p>
                 </div>
-            </div>
+            </div> -->
         </div>
     </div>
     
@@ -205,6 +205,23 @@
                     </p>
                     <div class="div text-center">
                         <h6>3%</h6>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mx-2 bg-light">
+                <div class="div text-center">
+                    <h6>Electricity Price</h6>
+                </div>
+                <div class="card-body text-center">
+                    <div class="container row">
+                    <h6 class="col"></h6>
+                    <!-- <meter id="ratio" value="0.5">50%</meter> -->
+                    <input type="range" min="1" max="100" value="<%= windspeed %>" class="slider col" id="myRange">
+                    <h6 class="col"></h6>
+                    </div>
+                    <div class="div text-center">
+                        <h6>???? :-<h6>
                     </div>
                 </div>
             </div>
