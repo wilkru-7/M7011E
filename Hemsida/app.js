@@ -100,7 +100,6 @@ app.get('/register', (req, res) => {
     res.render('register', {})
 })
 app.get('/admin', (req, res) => {
-    // users = findUsers();
     findUsers().then(value => { users = value});
 
     request('http://localhost:3002/', { json: true }, (err, res, body) => {
@@ -126,8 +125,11 @@ app.get('/admin', (req, res) => {
 
     buffer += netProduction;
 
-    
     res.render('admin', {users: users, price: price, windspeed: windspeed, consumption: consumption, production: production, netProduction: netProduction})
+})
+app.post('/delete', (req,res) => {
+    var username = req.body.username;
+    deleteUser(username);
 })
 app.post('/register', (req, res) => {
     var username = req.body.registerUsername;
@@ -239,6 +241,18 @@ async function findUsers(){
         const users = database.collection('Users');
         result = await users.find().toArray();
         return result;
+    } finally{
+        await client.close();
+    }
+}
+
+async function deleteUser(_username){
+    try{
+        await client.connect();
+        const database = client.db('M7011E');
+        const users = database.collection('Users');
+        const search = {username: _username};
+        await users.deleteOne(search);
     } finally{
         await client.close();
     }

@@ -48,7 +48,12 @@
                     <th scrope="row"><%= i %></th>
                     <td><%= users[i].username %></td>
                     <td></td>
-                    <td></td>
+                    <td>
+                        <form method="POST">
+                            <input type="hidden" name="username" value=<%= users[i].username %>>
+                            <input type="submit" value="Delete" formaction="/delete">
+                        </form>
+                    </td>
                 </tr>
               <% } %>
             </tbody>
