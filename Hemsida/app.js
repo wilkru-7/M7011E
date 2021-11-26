@@ -38,6 +38,7 @@ app.use(session({
 app.set('view engine', 'ejs');
 app.get('/', (req, res) => {
     if(req.session.loggedin){
+    console.log(req.session.loggedin)
     request('http://localhost:3002/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         price = res.body;
@@ -73,14 +74,24 @@ app.post('/login', (req,res) => {
     var password = req.body.password;
     /* TODO:
         Catch and no input should return false */
-    var loggedin = login(username, password).catch(console.dir)
-    if(loggedin){
+    login(username, password).catch(console.dir).then(result => {
+        console.log("Result is: ", result)
+        if(result == true){
+            req.session.loggedin = true;
+            res.redirect('/')
+        }
+        else{
+            res.redirect('login')
+        }
+    })
+    /* console.log("Loggedin is: ", loggedin)
+    if(loggedin == true){
         req.session.loggedin = true;
         res.redirect('/')
     }
     else{
         res.redirect('login')
-    }
+    } */
     //console.log(username)
 })
 app.post('/redirectregister', (req,res) => {
@@ -136,14 +147,17 @@ app.post('/register', (req, res) => {
     var password = req.body.registerPassword;
     var password2 = req.body.registerPassword2;
 
-    var exists = search(username)
+    search(username).then(exists => {
+        if(exists && password==password2){
+            insert(username, password)
+            res.redirect('/login')
+        } else{
+            console.log("Something was entered wrong")
+            res.redirect('/register')
+        }
+    })
 
-    if(exists && password==password2){
-        insert(username, password)
-        res.redirect('/login')
-    } else{
-        console.log("Something was entered wrong")
-    }
+
     //res.render('register', {})
 })
 
@@ -205,13 +219,15 @@ async function login(_username, _password){
         const users = database.collection('Users');
         const search = { username: _username};
         const result =  await users.findOne(search);
+        var response;
         if(result != null && _password == result.password){
             console.log("You are logged in")
-            return true
+            response = true
         } else{
             console.log("Wrong password (or wrong username)!!!")
-            return false
+            response = false
         }
+        return response
     } finally{
         await client.close();
     }
