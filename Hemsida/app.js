@@ -78,6 +78,8 @@ app.post('/login', (req,res) => {
         console.log("Result is: ", result)
         if(result == true){
             req.session.loggedin = true;
+            req.session.username = username;
+            loginDB(username)
             res.redirect('/')
         }
         else{
@@ -102,6 +104,7 @@ app.post('/redirectlogin', (req,res) => {
 })
 app.get('/logout', (req,res) => {
     req.session.loggedin = false
+    logoutDB(req.session.username)
     res.redirect('/login')
 })
 app.get('/login', (req, res) => {
@@ -111,8 +114,6 @@ app.get('/register', (req, res) => {
     res.render('register', {})
 })
 app.get('/admin', (req, res) => {
-    findUsers().then(value => { users = value});
-
     request('http://localhost:3002/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         price = res.body;
@@ -135,8 +136,13 @@ app.get('/admin', (req, res) => {
     netProduction = (consumption - production).toFixed(2)
 
     buffer += netProduction;
-
-    res.render('admin', {users: users, price: price, windspeed: windspeed, consumption: consumption, production: production, netProduction: netProduction})
+    console.log("users is: ", users)
+    findUsers().then(value => { 
+        console.log(value)
+        res.render('admin', {users: value, price: price, windspeed: windspeed, consumption: consumption, production: production, netProduction: netProduction
+        })
+});
+    //res.render('admin', {users: users, price: price, windspeed: windspeed, consumption: consumption, production: production, netProduction: netProduction})
 })
 app.post('/delete', (req,res) => {
     var username = req.body.username;
@@ -249,7 +255,42 @@ async function search(_username){
         await client.close();
     }
 }
-
+async function loginDB(_username){
+    try{
+        await client.connect();
+        const database = client.db('M7011E');
+        const users = database.collection('Users');
+        const filter = { username : _username };
+        const options = { upsert: true };
+        const updateDoc = {
+            $set: {
+              status: "Online"
+            },
+          };
+        const result = await users.updateOne(filter, updateDoc, options);
+        return result;
+    } finally{
+        await client.close();
+    }
+}
+async function logoutDB(_username){
+    try{
+        await client.connect();
+        const database = client.db('M7011E');
+        const users = database.collection('Users');
+        const filter = { username : _username };
+        const options = { upsert: true };
+        const updateDoc = {
+            $set: {
+              status: "Offline"
+            },
+          };
+        const result = await users.updateOne(filter, updateDoc, options);
+        return result;
+    } finally{
+        await client.close();
+    }
+}
 async function findUsers(){
     try{
         await client.connect();
