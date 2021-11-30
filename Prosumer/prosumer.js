@@ -11,8 +11,6 @@ app.get('/', (req, res) => {
     request('http://localhost:3001/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         price = res.body;
-
-        
     }); 
     res.send(price);
 })

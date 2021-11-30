@@ -2,6 +2,7 @@ var request = require('request');
 var express = require('express');
 var path = require('path');
 var ejs = require('ejs');
+var $ = require('jquery')
 var bodyParser = require('body-parser');
 var session = require('express-session');
 const fileUpload = require('express-fileupload');
@@ -14,6 +15,7 @@ const { MongoClient } = require("mongodb");
 
 const uri = "mongodb://localhost:27017";
 const client = new MongoClient(uri);
+app.use('/jquery', express.static(__dirname + '/node_modules/jquery/dist/'));
 
 app.use(express.urlencoded({
     extended: true
@@ -23,9 +25,7 @@ app.use(
   fileUpload()
 );
 
-// app.get("/", (req, res) => {
-//     res.sendFile(path.join(__dirname, "index.html"));
-//   });
+app.use(express.static('public'));
 
 /* TODO:
   Change secret to something(?)  */
@@ -36,33 +36,35 @@ app.use(session({
 }));
 
 app.set('view engine', 'ejs');
+
+app.get('/test', (req, res) => {
+    res.render("test")
+})
+app.get('/getWindspeed', (req, res) => {
+    getWindspeed()
+    res.send(windspeed);
+})
+app.get('/getPrice', (req, res) => {
+    getPrice()
+    res.send(price);
+})
+app.get('/getConsumption', (req, res) => {
+    getConsumption()
+    res.send(consumption);
+})
+app.get('/getProduction', (req, res) => {
+    getProduction()
+    res.send(production);
+})
 app.get('/', (req, res) => {
     if(req.session.loggedin){
     console.log(req.session.loggedin)
-    request('http://localhost:3002/', { json: true }, (err, res, body) => {
-        if (err) { return console.log(err); }
-        price = res.body;
-    }); 
-    
-    request('http://localhost:3001/', { json: true }, (err, res, body) => {
-        if (err) { return console.log(err); }
-        windspeed = res.body;
-    });
-    request('http://localhost:3000/', { json: true }, (err, res, body) => {
-        if (err) { return console.log(err); }
-        consumption = res.body;
-    });
+  
+ /*    netProduction = (consumption - production).toFixed(2)
 
-    request('http://localhost:3004/', { json: true }, (err, res, body) => {
-        if (err) { return console.log(err); }
-        production = res.body;
-    });
+    buffer += netProduction; */
 
-    netProduction = (consumption - production).toFixed(2)
-
-    buffer += netProduction;
-
-    res.render('index', {price: price, windspeed: windspeed, consumption: consumption, production: production, netProduction: netProduction})
+    res.render('index')
     }else{
         res.redirect("login")
     }
@@ -198,6 +200,35 @@ async function insert(_username, _password){
         await client.close();
     }
 
+}
+
+async function getWindspeed(){
+    request('http://localhost:3001/', { json: true }, (err, res, body) => {
+        if (err) { return console.log(err); }
+        windspeed = res.body;
+    });
+    return windspeed;
+}
+async function getConsumption(){
+    request('http://localhost:3000/', { json: true }, (err, res, body) => {
+        if (err) { return console.log(err); }
+        consumption = res.body;
+    })
+    return consumption;
+}
+async function getProduction(){
+    request('http://localhost:3004/', { json: true }, (err, res, body) => {
+        if (err) { return console.log(err); }
+        production = res.body;
+    }); 
+    return production;
+}
+async function getPrice(){
+    request('http://localhost:3002/', { json: true }, (err, res, body) => {
+        if (err) { return console.log(err); }
+        price = res.body;
+    })
+    return price;
 }
 /* async function bufferUpdate(){
     try{
