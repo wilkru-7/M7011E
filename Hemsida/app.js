@@ -65,6 +65,9 @@ app.get('/getNetProduction', (req, res) => {
     getNetProduction()
     res.send(netProduction + "");
 })
+app.get('/getBuffer', (req, res) => {
+    getBuffer(req.session.username).then(result => {res.send(buffer + "");})
+})
 app.get('/', (req, res) => {
     if(req.session.loggedin){
     console.log(req.session.loggedin)
@@ -203,7 +206,7 @@ async function insert(_username, _password){
         await client.connect();
         const database = client.db('M7011E');
         const users = database.collection('Users');
-        const insert = { username: _username, password: _password };
+        const insert = { username: _username, password: _password, buffer: 0};
         const result =  await users.insertOne(insert);
     } finally{
         await client.close();
@@ -256,6 +259,18 @@ async function getNetProduction(){
         netProduction = 0;
     } */
     return netProduction;
+}
+
+async function getBuffer(username){
+    netProduction = await getNetProduction()
+    bufferTemp = await getBufferForUser(username)
+    console.log("Buffer in database: " + bufferTemp)
+    console.log("Netproduction: " + netProduction)
+    buffer = bufferTemp + parseFloat(netProduction)
+    setBufferForUser(username, buffer)
+    // buffer = ( production - consumption).toFixed(2)
+    console.log("buffer:" + buffer)
+    return buffer;
 }
 /* async function bufferUpdate(){
     try{
@@ -360,7 +375,36 @@ async function findUsers(){
         await client.close();
     }
 }
-
+async function getBufferForUser(_username){
+    try{
+        await client.connect();
+        const database = client.db('M7011E');
+        const users = database.collection('Users');
+        const search = {username: _username};
+        const user =  await users.findOne(search); 
+        return user.buffer;
+    } finally{
+        await client.close();
+    }
+}
+async function setBufferForUser(_username, buffer){
+    try{
+        await client.connect();
+        const database = client.db('M7011E');
+        const users = database.collection('Users');
+        const filter = { username : _username };
+        const options = { upsert: true };
+        const updateDoc = {
+            $set: {
+              buffer: buffer
+            },
+          };
+        const result = await users.updateOne(filter, updateDoc, options);
+        return result;
+    } finally{
+        await client.close();
+    }
+}
 async function deleteUser(_username){
     try{
         await client.connect();

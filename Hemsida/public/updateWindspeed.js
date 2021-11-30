@@ -4,6 +4,7 @@ $( document ).ready(function() {
     updateConsumption()
     updateProduction()
     updateNetProduction()
+    updateBuffer()
 });
 /* {
     "Data":[
@@ -91,5 +92,19 @@ async function updateNetProduction() {
        }
     }).then(function () {
        setTimeout(updateNetProduction, 1000) //call itself every 1000ms
+    });
+}
+
+async function updateBuffer() {
+    $.ajax({
+       type: 'GET',
+       url: '/getBuffer',
+       success :(data) => {
+           //updateData(data);
+           $("#buffer").text(data);
+           console.log("buffer: "+ data);
+       }
+    }).then(function () {
+       setTimeout(updateBuffer, 1000) //call itself every 1000ms
     });
 }
