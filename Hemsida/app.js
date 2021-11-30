@@ -15,6 +15,7 @@ const { MongoClient } = require("mongodb");
 
 const uri = "mongodb://localhost:27017";
 const client = new MongoClient(uri);
+
 app.use('/jquery', express.static(__dirname + '/node_modules/jquery/dist/'));
 
 app.use(express.urlencoded({
@@ -40,6 +41,10 @@ app.set('view engine', 'ejs');
 app.get('/test', (req, res) => {
     res.render("test")
 })
+app.get('/getData', (req, res) => {
+    getWindspeed()
+    res.send(windspeed);
+})
 app.get('/getWindspeed', (req, res) => {
     getWindspeed()
     res.send(windspeed);
@@ -55,6 +60,10 @@ app.get('/getConsumption', (req, res) => {
 app.get('/getProduction', (req, res) => {
     getProduction()
     res.send(production);
+})
+app.get('/getNetProduction', (req, res) => {
+    getNetProduction()
+    res.send(netProduction + "");
 })
 app.get('/', (req, res) => {
     if(req.session.loggedin){
@@ -77,7 +86,7 @@ app.post('/login', (req,res) => {
     /* TODO:
         Catch and no input should return false */
     login(username, password).catch(console.dir).then(result => {
-        console.log("Result is: ", result)
+        /* console.log("Result is: ", result) */
         if(result == true){
             req.session.loggedin = true;
             req.session.username = username;
@@ -138,9 +147,9 @@ app.get('/admin', (req, res) => {
     netProduction = (consumption - production).toFixed(2)
 
     buffer += netProduction;
-    console.log("users is: ", users)
+    /* console.log("users is: ", users) */
     findUsers().then(value => { 
-        console.log(value)
+        /* console.log(value) */
         res.render('admin', {users: value, price: price, windspeed: windspeed, consumption: consumption, production: production, netProduction: netProduction
         })
 });
@@ -229,6 +238,24 @@ async function getPrice(){
         price = res.body;
     })
     return price;
+}
+async function getNetProduction(){
+    consumption = await getConsumption();
+/*     if(consumption==undefined){
+        consumption = 0;
+    } */
+    console.log("Consumption: " + consumption)
+    production = await getProduction();
+ /*    if(production==undefined){
+        production = 0;
+    } */
+    console.log("production:" + production)
+    netProduction =( production - consumption).toFixed(2);
+    console.log("netProduction:" + netProduction)
+    /* if (netProduction == NaN){
+        netProduction = 0;
+    } */
+    return netProduction;
 }
 /* async function bufferUpdate(){
     try{
