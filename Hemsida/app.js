@@ -9,7 +9,7 @@ const fileUpload = require('express-fileupload');
 
 const app = express()
 const port = 3003
-var price, windspeed, consumption, production, netProduction, ratio, buffer, users, power;
+var price, windspeed, consumption, production, netProduction, ratio1 = 0.5, ratio2 = 0.5, buffer, users, power;
 
 const { MongoClient } = require("mongodb");
 
@@ -189,6 +189,14 @@ app.post('/imageupload', (req, res) => {
     });
 })
 
+app.post('/sendToBuffer', (req, res) => {
+    ratio1 = req.body.sendToBuffer/100
+})
+
+app.post('/useFromBuffer', (req, res) => {
+    ratio2 = req.body.useFromBuffer/100
+})
+
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`)
 })
@@ -254,7 +262,7 @@ async function getBuffer(username) {
     getNetProduction().then(netProduction => {
         getBufferForUser(username).then(bufferTemp => {
             if (!isNaN(netProduction) && bufferTemp != undefined) {
-                buffer = (parseFloat(bufferTemp) + parseFloat(netProduction)).toFixed(2)
+                buffer = (parseFloat(bufferTemp) + parseFloat(ratio1 * netProduction)).toFixed(2)
                 console.log("IN BUFFER:")
                 console.log("bufferTemp: " + bufferTemp)
                 console.log("netProduction: " + netProduction)

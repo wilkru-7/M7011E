@@ -120,12 +120,29 @@
                 <div class="card-body text-center">
                         <div class="container row">
                         <h6 class="col">Send to Buffer</h6>
-                        <!-- <meter id="ratio" value="0.5">50%</meter> -->
+                            <form method="POST" action="/sendToBuffer" enctype="multipart/form-data">
+                                <input type="range" name="sendToBuffer" value="50" min="0" max="100" oninput="this.nextElementSibling.value = this.value">
+                                <output>50</output>
+                                <input type="submit" value="Update ratio">
+                            </form>
                         <h6 class="col">Sell on Market</h6>
                         </div>
-                        <div class="div text-center">
-                            <!-- <h6>50%</h6> -->
-                            
+                </div>
+            </div>
+
+            <div class="card shadow-sm mx-2 bg-light">
+                <div class="div text-center">
+                    <h6>Ratio</h6>
+                </div>
+                <div class="card-body text-center">
+                    <div class="container row">
+                        <h6 class="col">Use from Buffer</h6>
+                            <form method="POST" action="/useFromBuffer" enctype="multipart/form-data">
+                                <input type="range" name="useFromBuffer" value="50" min="0" max="100" oninput="this.nextElementSibling.value = this.value">
+                                <output>50</output>
+                                <input type="submit" value="Update ratio">
+                            </form>
+                        <h6 class="col">Buy from Market</h6>
                         </div>
                     </p>
                 </div>
