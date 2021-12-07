@@ -14,8 +14,10 @@
     "express": "^4.17.1",
     "express-fileupload": "^1.2.1",
     "express-session": "^1.17.2",
+    "jquery": "^3.6.0",
     "mongodb": "^4.1.4",
     "nodemon": "^2.0.15",
+    "package.json": "^2.0.1",
     "request": "^2.88.2"
   }
 }

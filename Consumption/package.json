@@ -1,9 +1,9 @@
 {
-  "name": "windspeed",
+  "name": "consumtion",
   "version": "1.0.0",
-  "main": "windSpeed.js",
+  "main": "consumption.js",
   "scripts": {
-    "start": "nodemon windSpeed.js",
+    "start": "nodemon consumption.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

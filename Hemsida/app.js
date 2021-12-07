@@ -9,7 +9,7 @@ const fileUpload = require('express-fileupload');
 
 const app = express()
 const port = 3003
-var price, windspeed, consumption, production, netProduction, ratio, buffer, users;
+var price, windspeed, consumption, production, netProduction, ratio, buffer, users, power;
 
 const { MongoClient } = require("mongodb");
 
@@ -20,10 +20,10 @@ app.use('/jquery', express.static(__dirname + '/node_modules/jquery/dist/'));
 
 app.use(express.urlencoded({
     extended: true
-  }))
+}))
 
 app.use(
-  fileUpload()
+    fileUpload()
 );
 
 app.use(express.static('public'));
@@ -31,9 +31,9 @@ app.use(express.static('public'));
 /* TODO:
   Change secret to something(?)  */
 app.use(session({
-	secret: 'secret',
-	resave: true,
-	saveUninitialized: true
+    secret: 'secret',
+    resave: true,
+    saveUninitialized: true
 }));
 
 app.set('view engine', 'ejs');
@@ -41,10 +41,10 @@ app.set('view engine', 'ejs');
 app.get('/test', (req, res) => {
     res.render("test")
 })
-app.get('/getData', (req, res) => {
-    getWindspeed()
-    res.send(windspeed);
-})
+// app.get('/getData', (req, res) => {
+//     getWindspeed()
+//     res.send(windspeed);
+// })
 app.get('/getWindspeed', (req, res) => {
     getWindspeed()
     res.send(windspeed);
@@ -66,22 +66,28 @@ app.get('/getNetProduction', (req, res) => {
     res.send(netProduction + "");
 })
 app.get('/getBuffer', (req, res) => {
-    getBuffer(req.session.username).then(result => {res.send(buffer + "");})
+    getBuffer(req.session.username).then(result => {
+        res.send(buffer + "");
+    })
+})
+app.get('/getUsers', (req, res) => {
+    findUsers().then(result => {
+        res.send(result)
+    })
+})
+app.get('/getPowerplant', (req, res) => {
+    getPower();
+    res.send(power + "")
 })
 app.get('/', (req, res) => {
-    if(req.session.loggedin){
-    console.log(req.session.loggedin)
-  
- /*    netProduction = (consumption - production).toFixed(2)
-
-    buffer += netProduction; */
-
-    res.render('index')
-    }else{
+    if (req.session.loggedin) {
+        console.log(req.session.loggedin)
+        res.render('index')
+    } else {
         res.redirect("login")
     }
 })
-app.post('/login', (req,res) => {
+app.post('/login', (req, res) => {
     /* TODO:
         Check input so no hacking */
     var username = req.body.username;
@@ -89,34 +95,24 @@ app.post('/login', (req,res) => {
     /* TODO:
         Catch and no input should return false */
     login(username, password).catch(console.dir).then(result => {
-        /* console.log("Result is: ", result) */
-        if(result == true){
+        if (result == true) {
             req.session.loggedin = true;
             req.session.username = username;
             loginDB(username)
             res.redirect('/')
         }
-        else{
+        else {
             res.redirect('login')
         }
     })
-    /* console.log("Loggedin is: ", loggedin)
-    if(loggedin == true){
-        req.session.loggedin = true;
-        res.redirect('/')
-    }
-    else{
-        res.redirect('login')
-    } */
-    //console.log(username)
 })
-app.post('/redirectregister', (req,res) => {
+app.post('/redirectregister', (req, res) => {
     res.redirect('/register')
 })
-app.post('/redirectlogin', (req,res) => {
+app.post('/redirectlogin', (req, res) => {
     res.redirect('/login')
 })
-app.get('/logout', (req,res) => {
+app.get('/logout', (req, res) => {
     req.session.loggedin = false
     logoutDB(req.session.username)
     res.redirect('/login')
@@ -131,8 +127,8 @@ app.get('/admin', (req, res) => {
     request('http://localhost:3002/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         price = res.body;
-    }); 
-    
+    });
+
     request('http://localhost:3001/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         windspeed = res.body;
@@ -150,15 +146,14 @@ app.get('/admin', (req, res) => {
     netProduction = (consumption - production).toFixed(2)
 
     buffer += netProduction;
-    /* console.log("users is: ", users) */
-    findUsers().then(value => { 
-        /* console.log(value) */
-        res.render('admin', {users: value, price: price, windspeed: windspeed, consumption: consumption, production: production, netProduction: netProduction
+
+    findUsers().then(value => {
+        res.render('admin', {
+            users: value, price: price, windspeed: windspeed, consumption: consumption, production: production, netProduction: netProduction
         })
-});
-    //res.render('admin', {users: users, price: price, windspeed: windspeed, consumption: consumption, production: production, netProduction: netProduction})
+    });
 })
-app.post('/delete', (req,res) => {
+app.post('/delete', (req, res) => {
     var username = req.body.username;
     deleteUser(username);
 })
@@ -168,17 +163,14 @@ app.post('/register', (req, res) => {
     var password2 = req.body.registerPassword2;
 
     search(username).then(exists => {
-        if(exists && password==password2){
+        if (exists && password == password2) {
             insert(username, password)
             res.redirect('/login')
-        } else{
+        } else {
             console.log("Something was entered wrong")
             res.redirect('/register')
         }
     })
-
-
-    //res.render('register', {})
 })
 
 app.post('/imageupload', (req, res) => {
@@ -193,7 +185,7 @@ app.post('/imageupload', (req, res) => {
         if (err) {
             return res.status(500).send(err);
         }
-            return res.send({ status: "success", path: path });
+        return res.send({ status: "success", path: path });
     });
 })
 
@@ -201,218 +193,208 @@ app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`)
 })
 
-async function insert(_username, _password){
-    try{
+async function insert(_username, _password) {
+    try {
         await client.connect();
         const database = client.db('M7011E');
         const users = database.collection('Users');
-        const insert = { username: _username, password: _password, buffer: 0};
-        const result =  await users.insertOne(insert);
-    } finally{
+        const insert = { username: _username, password: _password, buffer: 0 };
+        const result = await users.insertOne(insert);
+    } finally {
         await client.close();
     }
-
 }
 
-async function getWindspeed(){
+async function getWindspeed() {
     request('http://localhost:3001/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         windspeed = res.body;
     });
     return windspeed;
 }
-async function getConsumption(){
+async function getConsumption() {
     request('http://localhost:3000/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         consumption = res.body;
     })
     return consumption;
 }
-async function getProduction(){
+async function getProduction() {
     request('http://localhost:3004/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         production = res.body;
-    }); 
+    });
     return production;
 }
-async function getPrice(){
+async function getPrice() {
     request('http://localhost:3002/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         price = res.body;
     })
     return price;
 }
-async function getNetProduction(){
+async function getPower() {
+    request('http://localhost:3006/', { json: true }, (err, res, body) => {
+        if (err) { return console.log(err); }
+        power = res.body;
+    })
+    return power;
+}
+async function getNetProduction() {
     consumption = await getConsumption();
-/*     if(consumption==undefined){
-        consumption = 0;
-    } */
     console.log("Consumption: " + consumption)
     production = await getProduction();
- /*    if(production==undefined){
-        production = 0;
-    } */
     console.log("production:" + production)
-    netProduction =( production - consumption).toFixed(2);
+    netProduction = (production - consumption).toFixed(2);
     console.log("netProduction:" + netProduction)
-    /* if (netProduction == NaN){
-        netProduction = 0;
-    } */
     return netProduction;
 }
 
-async function getBuffer(username){
-    netProduction = await getNetProduction()
-    bufferTemp = await getBufferForUser(username)
-    console.log("Buffer in database: " + bufferTemp)
-    console.log("Netproduction: " + netProduction)
-    buffer = bufferTemp + parseFloat(netProduction)
-    setBufferForUser(username, buffer)
-    // buffer = ( production - consumption).toFixed(2)
-    console.log("buffer:" + buffer)
-    return buffer;
+async function getBuffer(username) {
+    getNetProduction().then(netProduction => {
+        getBufferForUser(username).then(bufferTemp => {
+            if (!isNaN(netProduction) && bufferTemp != undefined) {
+                buffer = (parseFloat(bufferTemp) + parseFloat(netProduction)).toFixed(2)
+                console.log("IN BUFFER:")
+                console.log("bufferTemp: " + bufferTemp)
+                console.log("netProduction: " + netProduction)
+                console.log("buffer: " + typeof buffer)
+                setBufferForUser(username, buffer)
+                return buffer;
+            } else {
+                return 0;
+            }
+        })
+    })
 }
-/* async function bufferUpdate(){
-    try{
-        await client.connect();
-        const database = client.db('M7011E');
-        const users = database.collection('Users');
-        const search = { username: _username};
-        const result =  await users.findOne(search);
-        if(result != null && _password == result.password){
-            console.log("You are logged in")
-            return true
-        } else{
-            console.log("Wrong password (or wrong username)!!!")
-            return false
-        }
-    } finally{
-        await client.close();
-    }
-} */
 
-async function login(_username, _password){
-    try{
+async function login(_username, _password) {
+    try {
         await client.connect();
         const database = client.db('M7011E');
         const users = database.collection('Users');
-        const search = { username: _username};
-        const result =  await users.findOne(search);
+        const search = { username: _username };
+        const result = await users.findOne(search);
         var response;
-        if(result != null && _password == result.password){
+        if (result != null && _password == result.password) {
             console.log("You are logged in")
             response = true
-        } else{
+        } else {
             console.log("Wrong password (or wrong username)!!!")
             response = false
         }
         return response
-    } finally{
+    } finally {
         await client.close();
     }
 }
 
-async function search(_username){
-    try{
+async function search(_username) {
+    try {
         await client.connect();
         const database = client.db('M7011E');
         const users = database.collection('Users');
-        const search = {username: _username};
-        const result =  await users.findOne(search);
-        if(result == null){
+        const search = { username: _username };
+        const result = await users.findOne(search);
+        if (result == null) {
             return true
-        }else{
+        } else {
             return false
         }
-    } finally{
+    } finally {
         await client.close();
     }
 }
-async function loginDB(_username){
-    try{
+async function loginDB(_username) {
+    try {
         await client.connect();
         const database = client.db('M7011E');
         const users = database.collection('Users');
-        const filter = { username : _username };
+        const filter = { username: _username };
         const options = { upsert: true };
         const updateDoc = {
             $set: {
-              status: "Online"
+                status: "Online"
             },
-          };
+        };
         const result = await users.updateOne(filter, updateDoc, options);
         return result;
-    } finally{
+    } finally {
         await client.close();
     }
 }
-async function logoutDB(_username){
-    try{
+async function logoutDB(_username) {
+    try {
         await client.connect();
         const database = client.db('M7011E');
         const users = database.collection('Users');
-        const filter = { username : _username };
+        const filter = { username: _username };
         const options = { upsert: true };
         const updateDoc = {
             $set: {
-              status: "Offline"
+                status: "Offline"
             },
-          };
+        };
         const result = await users.updateOne(filter, updateDoc, options);
         return result;
-    } finally{
+    } finally {
         await client.close();
     }
 }
-async function findUsers(){
-    try{
+async function findUsers() {
+    try {
         await client.connect();
         const database = client.db('M7011E');
         const users = database.collection('Users');
         result = await users.find().toArray();
         return result;
-    } finally{
+    } finally {
         await client.close();
     }
 }
-async function getBufferForUser(_username){
-    try{
+async function getBufferForUser(_username) {
+    try {
         await client.connect();
         const database = client.db('M7011E');
         const users = database.collection('Users');
-        const search = {username: _username};
-        const user =  await users.findOne(search); 
+        const search = { username: _username };
+        // await users.findOne(search).then(user => {
+        //     console.log("user.buffer: " + user.buffer)
+        //     return user.buffer;
+        // });
+        var user = await users.findOne(search)
+        console.log("user.buffer: " + user.buffer)
         return user.buffer;
-    } finally{
+    } finally {
         await client.close();
     }
 }
-async function setBufferForUser(_username, buffer){
-    try{
+async function setBufferForUser(_username, buffer) {
+    try {
         await client.connect();
         const database = client.db('M7011E');
         const users = database.collection('Users');
-        const filter = { username : _username };
+        const filter = { username: _username };
         const options = { upsert: true };
         const updateDoc = {
             $set: {
-              buffer: buffer
+                buffer: buffer
             },
-          };
+        };
         const result = await users.updateOne(filter, updateDoc, options);
         return result;
-    } finally{
+    } finally {
         await client.close();
     }
 }
-async function deleteUser(_username){
-    try{
+async function deleteUser(_username) {
+    try {
         await client.connect();
         const database = client.db('M7011E');
         const users = database.collection('Users');
-        const search = {username: _username};
+        const search = { username: _username };
         await users.deleteOne(search);
-    } finally{
+    } finally {
         await client.close();
     }
 }

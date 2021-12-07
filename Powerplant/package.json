@@ -1,0 +1,12 @@
+{
+  "name": "powerplant",
+  "version": "1.0.0",
+  "description": "",
+  "main": "powerplant.js",
+  "scripts": {
+    "start": "node powerplant.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

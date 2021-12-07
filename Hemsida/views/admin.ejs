@@ -9,6 +9,7 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="/updateAdmin.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
     <link rel="stylesheet" href="">
@@ -22,62 +23,70 @@
         </div>
     </nav>
 
-     <!-- Users -->
-     <div class="container">
+    <!-- Users -->
+    <div class="container">
         <h2>Users</h2>
     </div>
 
     <!-- Vertikal Linje -->
     <div class="container pb-2">
         <hr class="mb-4 my-auto">
-        </div>
+    </div>
 
     <div class="container pb-5">
         <table class="table table-hover">
             <thead class="table-light">
-              <tr>
-                <th scope="col">#</th>
-                <th scope="col">Username</th>
-                <th scope="col">Status</th>
-                <th scope="col">Consumption</th>
-                <th scope="col">Production</th>
-                <th scope="col">Buffer</th>
-                <th scope="col">Block from selling</th>
-                <th scope="col">Update credentials</th>
-                <th scope="col">Remove user</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% for(var i=0; i<users.length; i++) {%>
                 <tr>
-                    <th scrope="row"><%= i %></th>
-                    <td><%= users[i].username %></td>
-                    <td><%= users[i].status %></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td>
-                        <form method="POST">
-                            <input type="hidden" name="username" value=<%= users[i].username %>>
-                            <input type="submit" value="Block">
-                        </form>
-                    </td>
-                    <td>
-                        <form method="POST">
-                            <input type="hidden" name="username" value=<%= users[i].username %>>
-                            <input type="submit" value="Update">
-                        </form>
-                    </td>
-                    <td>
-                        <form method="POST">
-                            <input type="hidden" name="username" value=<%= users[i].username %>>
-                            <input type="submit" value="Delete" formaction="/delete">
-                        </form>
-                    </td>
+                    <th scope="col">#</th>
+                    <th scope="col">Username</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Consumption</th>
+                    <th scope="col">Production</th>
+                    <th scope="col">Buffer</th>
+                    <th scope="col">Block from selling</th>
+                    <th scope="col">Update credentials</th>
+                    <th scope="col">Remove user</th>
                 </tr>
-              <% } %>
+            </thead>
+            <tbody id="users">
+                <% for(var i=0; i<users.length; i++) {%>
+                    <tr>
+                        <th scrope="row">
+                            <%= i %>
+                        </th>
+                        <td>
+                            <%= users[i].username %>
+                        </td>
+                        <td>
+                            <%= users[i].status %>
+                        </td>
+                        <td></td>
+                        <td></td>
+                        <td id=<%=i %>>
+                            <!-- <%= users[i].buffer %> -->
+                        </td>
+                        <td>
+                            <form method="POST">
+                                <input type="hidden" name="username" value=<%=users[i].username %>>
+                                <input type="submit" value="Block">
+                            </form>
+                        </td>
+                        <td>
+                            <form method="POST">
+                                <input type="hidden" name="username" value=<%=users[i].username %>>
+                                <input type="submit" value="Update">
+                            </form>
+                        </td>
+                        <td>
+                            <form method="POST">
+                                <input type="hidden" name="username" value=<%=users[i].username %>>
+                                <input type="submit" value="Delete" formaction="/delete">
+                            </form>
+                        </td>
+                    </tr>
+                    <% } %>
             </tbody>
-          </table>
+        </table>
     </div>
 
     <!-- Statistics -->
@@ -87,13 +96,13 @@
 
     <!-- Vertikal Linje -->
     <div class="container pb-2">
-    <hr class="mb-4 my-auto">
+        <hr class="mb-4 my-auto">
     </div>
 
     <!-- Kort-grupp -->
     <div class="container pb-5">
         <div class="card-group mx-auto">
-            
+
             <!-- Kort Wind-->
             <div class="card shadow-sm mx-2 bg-light">
                 <div class="div text-center">
@@ -112,9 +121,9 @@
                     <h6>Modelled price</h6>
                 </div>
                 <div class="card-body text-center">
-                    <!-- <p>
-                        <%= price %>
-                    </p> -->
+                    <p id="price">
+
+                    </p>
                 </div>
             </div>
 
@@ -136,7 +145,7 @@
                     <h6>Electricity production</h6>
                 </div>
                 <div class="card-body text-center ">
-                    <!-- <p id="production"><%= production %></p> -->
+                    <p id="power"></p>
                 </div>
             </div>
 
@@ -161,7 +170,7 @@
             </div> -->
         </div>
     </div>
-    
+
     <!-- Control Panel -->
     <div class="container">
         <h2>Control Panel</h2>
@@ -170,7 +179,7 @@
     <!-- Vertikal Linje -->
     <div class="container pb-2">
         <hr class="mb-4 my-auto">
-        </div>
+    </div>
     <!-- Andra raden --->
     <div class="container pb-5">
         <div class="card-group mx-auto">
@@ -181,31 +190,31 @@
                     <h6>Electricity Production</h6>
                 </div>
                 <div class="card-body text-center">
-                        <div class="container row">
+                    <div class="container row">
                         <h6 class="col">On/Off</h6>
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
                             <label class="form-check-label" for="flexSwitchCheckDefault"></label>
                         </div>
-                        </div>
+                    </div>
                 </div>
             </div>
-            
+
             <!-- Kort Ratio-->
             <div class="card shadow-sm mx-2 bg-light">
                 <div class="div text-center">
                     <h6>Ratio</h6>
                 </div>
                 <div class="card-body text-center">
-                        <div class="container row">
+                    <div class="container row">
                         <h6 class="col">Send to Buffer</h6>
                         <!-- <meter id="ratio" value="0.5">50%</meter> -->
                         <input type="range" min="1" max="100" value="<%= windspeed %>" class="slider col" id="myRange">
                         <h6 class="col">Sell on Market</h6>
-                        </div>
-                        <div class="div text-center">
-                            <h6>50%</h6>
-                        </div>
+                    </div>
+                    <div class="div text-center">
+                        <h6>50%</h6>
+                    </div>
                     </p>
                 </div>
             </div>
@@ -218,7 +227,7 @@
                     <p id="wind">
                         <label for="buffer">Buffer</label>
                         <meter id="buffer" value="0.1">2%</meter>
-                    
+
                         <!-- <%= windspeed %> -->
                     </p>
                     <div class="div text-center">
@@ -233,10 +242,10 @@
                 </div>
                 <div class="card-body text-center">
                     <div class="container row">
-                    <h6 class="col"></h6>
-                    <!-- <meter id="ratio" value="0.5">50%</meter> -->
-                    <input type="range" min="1" max="100" value="<%= windspeed %>" class="slider col" id="myRange">
-                    <h6 class="col"></h6>
+                        <h6 class="col"></h6>
+                        <!-- <meter id="ratio" value="0.5">50%</meter> -->
+                        <input type="range" min="1" max="100" value="<%= windspeed %>" class="slider col" id="myRange">
+                        <h6 class="col"></h6>
                     </div>
                     <div class="div text-center">
                         <h6>???? :-<h6>
@@ -256,7 +265,7 @@
     <!-- Vertikal Linje -->
     <div class="container pb-2">
         <hr class="mb-4 my-auto">
-        </div>
+    </div>
 
     <div class="container">
         <form method="POST" action="/imageupload" enctype="multipart/form-data">
@@ -264,7 +273,7 @@
             <input type="submit">
         </form>
     </div>
-    
+
 </body>
 
 </html>
