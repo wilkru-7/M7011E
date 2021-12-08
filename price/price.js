@@ -8,8 +8,17 @@ var express = require('express');
 const app = express()
 const port = 3007
 var price = 0;
+
+app.use(express.urlencoded({
+    extended: true
+}))
 app.get('/', (req, res) => {
-    res.json(price.toFixed(2));
+    res.send(price + "");
+})
+
+app.get('/setPrice/:price', (req, res) => {
+    price = req.params['price']
+    //res.send("req.params")
 })
 
 app.listen(port, () => {

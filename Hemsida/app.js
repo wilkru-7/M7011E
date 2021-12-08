@@ -53,10 +53,10 @@ app.get('/getModelledPrice', (req, res) => {
     getModelledPrice()
     res.send(modelledPrice);
 })
-app.get('/getPrice', (req, res) => {
-    getPrice()
-    res.send(price);
-})
+// app.get('/getPrice', (req, res) => {
+//     getPrice()
+//     res.send(price);
+// })
 app.get('/getConsumption', (req, res) => {
     getConsumption()
     res.send(consumption);
@@ -84,8 +84,10 @@ app.get('/getPowerplant', (req, res) => {
     res.send(power + "")
 })
 app.get('/getPrice', (req, res) => {
-    getPrice();
-    res.send(price + "")
+    getPrice().then(result => {
+        res.send(result + "")
+    });
+    //res.send(price + "")
 })
 app.get('/', (req, res) => {
     if (req.session.loggedin) {
@@ -96,9 +98,12 @@ app.get('/', (req, res) => {
     }
 })
 app.get('/getStatus', (req, res) => {
-    getStatus();
-    res.send(isOn + "")
+    getStatus().then(result => {
+        res.send(result + "")
+    });
+    //res.send(isOn + "")
 })
+
 app.post('/login', (req, res) => {
     /* TODO:
         Check input so no hacking */
@@ -202,15 +207,39 @@ app.post('/imageupload', (req, res) => {
 })
 
 app.post('/sendToBuffer', (req, res) => {
-    ratio1 = req.body.sendToBuffer/100
+    ratio1 = req.body.sendToBuffer / 100
 })
 
 app.post('/useFromBuffer', (req, res) => {
-    ratio2 = req.body.useFromBuffer/100
+    ratio2 = req.body.useFromBuffer / 100
 })
 
 app.post('/setPrice', (req, res) => {
+    request('http://localhost:3007/setPrice/' + req.body.setPrice, { json: true }, (err, res, body) => {
+        if (err) { return console.log(err); }
+    });
     price = req.body.setPrice
+})
+
+app.post('/switch', (req, res) => {
+    console.log("req.body.switch :" + req.body.switch)
+    if (req.body.switch == "on") {
+        request('http://localhost:3006/start/', { json: true }, (err, res, body) => {
+            if (err) {
+                return console.log(err);
+            }
+        });
+    } else {
+        request('http://localhost:3006/stop/', { json: true }, (err, res, body) => {
+            if (err) {
+                return console.log(err);
+            }
+        });
+    }
+    // request('http://localhost:3006/setPrice/' + req.body.setPrice, { json: true }, (err, res, body) => {
+    //     if (err) { return console.log(err); }
+    // });
+    // price = req.body.setPrice
 })
 
 app.listen(port, () => {
@@ -276,12 +305,13 @@ async function getStatus() {
     request('http://localhost:3006/status', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         isOn = res.body;
+        console.log("isOn: " + isOn)
     })
-    // if(isOn == "true"){
-    //     return "running";
-    // } else {
-    //     return "stopped";
-    // }
+    if (isOn) {
+        return "running";
+    } else {
+        return "stopped";
+    }
 }
 
 async function getNetProduction() {

@@ -134,7 +134,7 @@
                 </div>
                 <div class="card-body text-center">
                     <p id="price">
-                       
+
                     </p>
                 </div>
             </div>
@@ -184,18 +184,22 @@
     <div class="container pb-5">
         <div class="card-group mx-auto">
 
-            <!-- Kort Ratio-->
+            <!-- Set Production Status Kort-->
             <div class="card shadow-sm mx-2 bg-light">
                 <div class="div text-center">
                     <h6>Electricity Production</h6>
                 </div>
                 <div class="card-body text-center">
                     <div class="container row">
-                        <h6 class="col">On/Off</h6>
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
-                            <label class="form-check-label" for="flexSwitchCheckDefault"></label>
-                        </div>
+                        <form method="POST" action="/switch" enctype="multipart/form-data">
+                            <h6 class="col">Off/On</h6>
+                            <div class="form-check form-switch">
+                                <input onChange="this.form.submit()" name="switch" class="form-check-input"
+                                    type="checkbox" role="switch" id="flexSwitchCheckDefault" checked>
+                                <label class="form-check-label" for="flexSwitchCheckDefault"></label>
+                            </div>
+                        </form>
+
                     </div>
                 </div>
             </div>
@@ -208,16 +212,18 @@
                 <div class="card-body text-center">
                     <div class="container row">
                         <h6 class="col">Send to Buffer</h6>
-                            <form method="POST" action="/sendToBuffer" enctype="multipart/form-data">
-                                <input type="range" name="sendToBuffer" value="50" min="0" max="100" oninput="this.nextElementSibling.value = this.value">
-                                <output>50</output>
-                                <input type="submit" value="Update ratio">
-                            </form>
+                        <form method="POST" action="/sendToBuffer" enctype="multipart/form-data">
+                            <input type="range" name="sendToBuffer" value="50" min="0" max="100"
+                                oninput="this.nextElementSibling.value = this.value">
+                            <output>50</output>
+                            <input type="submit" value="Update ratio">
+                        </form>
                         <h6 class="col">Sell on Market</h6>
                     </div>
                 </div>
             </div>
 
+            <!-- Buffer kort-->
             <div class="card shadow-sm mx-2 bg-light">
                 <div class="div text-center">
                     <h6>Buffer</h6>
@@ -234,18 +240,19 @@
                     </div>
                 </div>
             </div>
-
+            <!-- Set Price Kort-->
             <div class="card shadow-sm mx-2 bg-light">
                 <div class="div text-center">
                     <h6>Electricity Price</h6>
                 </div>
                 <div class="card-body text-center">
                     <div class="container row">
-                            <form method="POST" action="/setPrice" enctype="multipart/form-data">
-                                <input type="range" name="setPrice" value="0" min="0" max="100" oninput="this.nextElementSibling.value = this.value">
-                                <output>0</output>
-                                <input type="submit" value="Set price">
-                            </form>
+                        <form method="POST" action="/setPrice" enctype="multipart/form-data">
+                            <input type="range" name="setPrice" value="0" min="0" max="100"
+                                oninput="this.nextElementSibling.value = this.value">
+                            <output>0</output>
+                            <input type="submit" value="Set price">
+                        </form>
                     </div>
                 </div>
             </div>
