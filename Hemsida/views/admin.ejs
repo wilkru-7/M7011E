@@ -121,7 +121,7 @@
                     <h6>Modelled price</h6>
                 </div>
                 <div class="card-body text-center">
-                    <p id="price">
+                    <p id="modelledPrice">
 
                     </p>
                 </div>
@@ -133,9 +133,9 @@
                     <h6>Price</h6>
                 </div>
                 <div class="card-body text-center">
-                    <!-- <p>
-                        <%= consumption %>
-                    </p> -->
+                    <p id="price">
+                       
+                    </p>
                 </div>
             </div>
 
@@ -155,7 +155,7 @@
                     <h6>Status</h6>
                 </div>
                 <div class="card-body text-center">
-                    <!-- <p><%= netProduction %></p> -->
+                    <p id="status"></p>
                 </div>
             </div>
 
@@ -208,14 +208,13 @@
                 <div class="card-body text-center">
                     <div class="container row">
                         <h6 class="col">Send to Buffer</h6>
-                        <!-- <meter id="ratio" value="0.5">50%</meter> -->
-                        <input type="range" min="1" max="100" value="<%= windspeed %>" class="slider col" id="myRange">
+                            <form method="POST" action="/sendToBuffer" enctype="multipart/form-data">
+                                <input type="range" name="sendToBuffer" value="50" min="0" max="100" oninput="this.nextElementSibling.value = this.value">
+                                <output>50</output>
+                                <input type="submit" value="Update ratio">
+                            </form>
                         <h6 class="col">Sell on Market</h6>
                     </div>
-                    <div class="div text-center">
-                        <h6>50%</h6>
-                    </div>
-                    </p>
                 </div>
             </div>
 
@@ -242,13 +241,11 @@
                 </div>
                 <div class="card-body text-center">
                     <div class="container row">
-                        <h6 class="col"></h6>
-                        <!-- <meter id="ratio" value="0.5">50%</meter> -->
-                        <input type="range" min="1" max="100" value="<%= windspeed %>" class="slider col" id="myRange">
-                        <h6 class="col"></h6>
-                    </div>
-                    <div class="div text-center">
-                        <h6>???? :-<h6>
+                            <form method="POST" action="/setPrice" enctype="multipart/form-data">
+                                <input type="range" name="setPrice" value="0" min="0" max="100" oninput="this.nextElementSibling.value = this.value">
+                                <output>0</output>
+                                <input type="submit" value="Set price">
+                            </form>
                     </div>
                 </div>
             </div>

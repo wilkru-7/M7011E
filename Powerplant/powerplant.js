@@ -26,6 +26,10 @@ app.get('/', (req, res) => {
     }
 })
 
+app.get('/status', (req, res) => {
+    res.send(isOn + "")
+})
+
 app.get('/start', (req, res) => {
     setStatus(true)
 })

@@ -1,7 +1,9 @@
 $(document).ready(function () {
     updateBuffer()
+    updateModelledPrice()
     updatePrice()
     updatePower()
+    updateStatus()
 });
 async function updateBuffer() {
     $.ajax({
@@ -15,6 +17,18 @@ async function updateBuffer() {
         }
     }).then(function () {
         setTimeout(updateBuffer, 1000) //call itself every 1000ms
+    });
+}
+
+async function updateModelledPrice() {
+    $.ajax({
+        type: 'GET',
+        url: '/getModelledPrice',
+        success: (price) => {
+            $("#modelledPrice").text(price)
+        }
+    }).then(function () {
+        setTimeout(updateModelledPrice, 1000) //call itself every 1000ms
     });
 }
 
@@ -40,5 +54,17 @@ async function updatePower() {
         }
     }).then(function () {
         setTimeout(updatePower, 1000) //call itself every 1000ms
+    });
+}
+
+async function updateStatus() {
+    $.ajax({
+        type: 'GET',
+        url: '/getStatus',
+        success: (status) => {
+            $("#status").text(status)
+        }
+    }).then(function () {
+        setTimeout(updateStatus, 1000) //call itself every 1000ms
     });
 }

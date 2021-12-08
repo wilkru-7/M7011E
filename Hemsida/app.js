@@ -9,7 +9,7 @@ const fileUpload = require('express-fileupload');
 
 const app = express()
 const port = 3003
-var price, windspeed, consumption, production, netProduction, ratio1 = 0.5, ratio2 = 0.5, buffer, users, power;
+var modelledPrice, price, windspeed, consumption, production, netProduction, ratio1 = 0.5, ratio2 = 0.5, buffer, users, power, isOn;
 
 const { MongoClient } = require("mongodb");
 
@@ -49,6 +49,10 @@ app.get('/getWindspeed', (req, res) => {
     getWindspeed()
     res.send(windspeed);
 })
+app.get('/getModelledPrice', (req, res) => {
+    getModelledPrice()
+    res.send(modelledPrice);
+})
 app.get('/getPrice', (req, res) => {
     getPrice()
     res.send(price);
@@ -79,6 +83,10 @@ app.get('/getPowerplant', (req, res) => {
     getPower();
     res.send(power + "")
 })
+app.get('/getPrice', (req, res) => {
+    getPrice();
+    res.send(price + "")
+})
 app.get('/', (req, res) => {
     if (req.session.loggedin) {
         console.log(req.session.loggedin)
@@ -86,6 +94,10 @@ app.get('/', (req, res) => {
     } else {
         res.redirect("login")
     }
+})
+app.get('/getStatus', (req, res) => {
+    getStatus();
+    res.send(isOn + "")
 })
 app.post('/login', (req, res) => {
     /* TODO:
@@ -126,7 +138,7 @@ app.get('/register', (req, res) => {
 app.get('/admin', (req, res) => {
     request('http://localhost:3002/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
-        price = res.body;
+        modelledPrice = res.body;
     });
 
     request('http://localhost:3001/', { json: true }, (err, res, body) => {
@@ -149,7 +161,7 @@ app.get('/admin', (req, res) => {
 
     findUsers().then(value => {
         res.render('admin', {
-            users: value, price: price, windspeed: windspeed, consumption: consumption, production: production, netProduction: netProduction
+            users: value, modelledPrice: modelledPrice, windspeed: windspeed, consumption: consumption, production: production, netProduction: netProduction
         })
     });
 })
@@ -197,6 +209,10 @@ app.post('/useFromBuffer', (req, res) => {
     ratio2 = req.body.useFromBuffer/100
 })
 
+app.post('/setPrice', (req, res) => {
+    price = req.body.setPrice
+})
+
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`)
 })
@@ -234,8 +250,15 @@ async function getProduction() {
     });
     return production;
 }
-async function getPrice() {
+async function getModelledPrice() {
     request('http://localhost:3002/', { json: true }, (err, res, body) => {
+        if (err) { return console.log(err); }
+        modelledPrice = res.body;
+    })
+    return modelledPrice;
+}
+async function getPrice() {
+    request('http://localhost:3007/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         price = res.body;
     })
@@ -248,6 +271,19 @@ async function getPower() {
     })
     return power;
 }
+
+async function getStatus() {
+    request('http://localhost:3006/status', { json: true }, (err, res, body) => {
+        if (err) { return console.log(err); }
+        isOn = res.body;
+    })
+    // if(isOn == "true"){
+    //     return "running";
+    // } else {
+    //     return "stopped";
+    // }
+}
+
 async function getNetProduction() {
     consumption = await getConsumption();
     console.log("Consumption: " + consumption)

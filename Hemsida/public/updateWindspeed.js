@@ -1,6 +1,6 @@
 $( document ).ready(function() {
     updateWindspeed()
-    updatePrice()
+    updateModelledPrice()
     updateConsumption()
     updateProduction()
     updateNetProduction()
@@ -39,17 +39,17 @@ async function updateWindspeed() {
        setTimeout(updateWindspeed, 1000) //call itself every 1000ms
     });
 }
-async function updatePrice() {
+async function updateModelledPrice() {
     $.ajax({
        type: 'GET',
-       url: '/getPrice',
+       url: '/getModelledPrice',
        success :(data) => {
            //updateData(data);
-           $("#price").text(data);
+           $("#modelledPrice").text(data);
            console.log("price:" + data);
        }
     }).then(function () {
-       setTimeout(updatePrice, 1000) //call itself every 1000ms
+       setTimeout(updateModelledPrice, 1000) //call itself every 1000ms
     });
 }
 
