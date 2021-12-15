@@ -1,4 +1,4 @@
-$( document ).ready(function() {
+$(document).ready(function () {
     updateWindspeed()
     updateModelledPrice()
     updateConsumption()
@@ -28,83 +28,83 @@ $( document ).ready(function() {
 } */
 async function updateWindspeed() {
     $.ajax({
-       type: 'GET',
-       url: '/getWindspeed',
-       success :(data) => {
-           //updateData(data);
-           $("#wind").text(data);
-           console.log("wind: " + data);
-       }
+        type: 'GET',
+        url: '/getWindspeed',
+        success: (data) => {
+            //updateData(data);
+            $("#wind").text(data);
+            console.log("wind: " + data);
+        }
     }).then(function () {
-       setTimeout(updateWindspeed, 1000) //call itself every 1000ms
+        setTimeout(updateWindspeed, 100) //call itself every 100ms
     });
 }
 async function updateModelledPrice() {
     $.ajax({
-       type: 'GET',
-       url: '/getModelledPrice',
-       success :(data) => {
-           //updateData(data);
-           $("#modelledPrice").text(data);
-           console.log("price:" + data);
-       }
+        type: 'GET',
+        url: '/getModelledPrice',
+        success: (data) => {
+            //updateData(data);
+            $("#modelledPrice").text(data);
+            console.log("price:" + data);
+        }
     }).then(function () {
-       setTimeout(updateModelledPrice, 1000) //call itself every 1000ms
+        setTimeout(updateModelledPrice, 100) //call itself every 100ms
     });
 }
 
 async function updateProduction() {
     $.ajax({
-       type: 'GET',
-       url: '/getProduction',
-       success :(data) => {
-           //updateData(data);
-           $("#production").text(data);
-           console.log("production: " + data);
-       }
+        type: 'GET',
+        url: '/getProduction',
+        success: (data) => {
+            //updateData(data);
+            $("#production").text(data);
+            console.log("production: " + data);
+        }
     }).then(function () {
-       setTimeout(updateProduction, 1000) //call itself every 1000ms
+        setTimeout(updateProduction, 100) //call itself every 100ms
     });
 }
 
 async function updateConsumption() {
     $.ajax({
-       type: 'GET',
-       url: '/getConsumption',
-       success :(data) => {
-           //updateData(data);
-           $("#consumption").text(data);
-           console.log("consumption: "+ data);
-       }
+        type: 'GET',
+        url: '/getConsumption',
+        success: (data) => {
+            //updateData(data);
+            $("#consumption").text(data);
+            console.log("consumption: " + data);
+        }
     }).then(function () {
-       setTimeout(updateConsumption, 1000) //call itself every 1000ms
+        setTimeout(updateConsumption, 100) //call itself every 100ms
     });
 }
 
 async function updateNetProduction() {
     $.ajax({
-       type: 'GET',
-       url: '/getNetProduction',
-       success :(data) => {
-           //updateData(data);
-           $("#netProduction").text(data);
-           console.log("netProduction: "+ data);
-       }
+        type: 'GET',
+        url: '/getNetProduction',
+        success: (data) => {
+            //updateData(data);
+            $("#netProduction").text(data);
+            console.log("netProduction: " + data);
+        }
     }).then(function () {
-       setTimeout(updateNetProduction, 1000) //call itself every 1000ms
+        setTimeout(updateNetProduction, 100) //call itself every 100ms
     });
 }
 
 async function updateBuffer() {
     $.ajax({
-       type: 'GET',
-       url: '/getBuffer',
-       success :(data) => {
-           //updateData(data);
-           $("#buffer").text(data);
-           console.log("buffer: "+ data);
-       }
+        type: 'GET',
+        url: '/getBuffer',
+        success: (data) => {
+            //updateData(data);
+            $("#buffer").text(data);
+            console.log("buffer: " + data);
+        }
     }).then(function () {
-       setTimeout(updateBuffer, 1000) //call itself every 1000ms
+        setTimeout(updateBuffer, 100) //call itself every 100ms
     });
 }

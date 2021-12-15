@@ -13,7 +13,7 @@ var modelledPrice, price, windspeed, consumption, production, netProduction, rat
 
 const { MongoClient } = require("mongodb");
 
-const uri = "mongodb://83.209.178.176:27017";
+const uri = "mongodb://83.209.178.176:27017/M7011E";
 const client = new MongoClient(uri);
 
 app.use('/jquery', express.static(__dirname + '/node_modules/jquery/dist/'));
@@ -155,28 +155,28 @@ app.get('/admin', (req, res) => {
         consumption = res.body;
     });
 
-    request('http://production:3004/', { json: true }, (err, res, body) => {
+    request('http://producer:3004/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         production = res.body;
     });
-/*     request('http://localhost:3002/', { json: true }, (err, res, body) => {
-        if (err) { return console.log(err); }
-        modelledPrice = res.body;
-    });
-
-    request('http://localhost:3001/', { json: true }, (err, res, body) => {
-        if (err) { return console.log(err); }
-        windspeed = res.body;
-    });
-    request('http://localhost:3000/', { json: true }, (err, res, body) => {
-        if (err) { return console.log(err); }
-        consumption = res.body;
-    });
-
-    request('http://localhost:3004/', { json: true }, (err, res, body) => {
-        if (err) { return console.log(err); }
-        production = res.body;
-    }); */
+    /*     request('http://localhost:3002/', { json: true }, (err, res, body) => {
+            if (err) { return console.log(err); }
+            modelledPrice = res.body;
+        });
+    
+        request('http://localhost:3001/', { json: true }, (err, res, body) => {
+            if (err) { return console.log(err); }
+            windspeed = res.body;
+        });
+        request('http://localhost:3000/', { json: true }, (err, res, body) => {
+            if (err) { return console.log(err); }
+            consumption = res.body;
+        });
+    
+        request('http://localhost:3004/', { json: true }, (err, res, body) => {
+            if (err) { return console.log(err); }
+            production = res.body;
+        }); */
 
     netProduction = (consumption - production).toFixed(2)
 
@@ -236,9 +236,9 @@ app.post('/setPrice', (req, res) => {
     request('http://price:3007/setPrice/' + req.body.setPrice, { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
     });
-/*     request('http://localhost:3007/setPrice/' + req.body.setPrice, { json: true }, (err, res, body) => {
-        if (err) { return console.log(err); }
-    }); */
+    /*     request('http://localhost:3007/setPrice/' + req.body.setPrice, { json: true }, (err, res, body) => {
+            if (err) { return console.log(err); }
+        }); */
     price = req.body.setPrice
 })
 
@@ -250,27 +250,27 @@ app.post('/switch', (req, res) => {
                 return console.log(err);
             }
         });
-/*         request('http://localhost:3006/start/', { json: true }, (err, res, body) => {
-            if (err) {
-                return console.log(err);
-            }
-        }); */
-/*         request('http://localhost:3006/start/', { json: true }, (err, res, body) => {
-            if (err) {
-                return console.log(err);
-            }
-        }); */
+        /*         request('http://localhost:3006/start/', { json: true }, (err, res, body) => {
+                    if (err) {
+                        return console.log(err);
+                    }
+                }); */
+        /*         request('http://localhost:3006/start/', { json: true }, (err, res, body) => {
+                    if (err) {
+                        return console.log(err);
+                    }
+                }); */
     } else {
         request('http://powerplant:3006/stop/', { json: true }, (err, res, body) => {
             if (err) {
                 return console.log(err);
             }
         });
-/*         request('http://localhost:3006/stop/', { json: true }, (err, res, body) => {
-            if (err) {
-                return console.log(err);
-            }
-        }); */
+        /*         request('http://localhost:3006/stop/', { json: true }, (err, res, body) => {
+                    if (err) {
+                        return console.log(err);
+                    }
+                }); */
     }
     // request('http://localhost:3006/setPrice/' + req.body.setPrice, { json: true }, (err, res, body) => {
     //     if (err) { return console.log(err); }
@@ -299,10 +299,10 @@ async function getWindspeed() {
         if (err) { return console.log(err); }
         windspeed = res.body;
     });
-/*     request('http://localhost:3001/', { json: true }, (err, res, body) => {
-        if (err) { return console.log(err); }
-        windspeed = res.body;
-    }); */
+    /*     request('http://localhost:3001/', { json: true }, (err, res, body) => {
+            if (err) { return console.log(err); }
+            windspeed = res.body;
+        }); */
     return windspeed;
 }
 async function getConsumption() {
@@ -310,21 +310,21 @@ async function getConsumption() {
         if (err) { return console.log(err); }
         consumption = res.body;
     })
-/*     request('http://localhost:3000/', { json: true }, (err, res, body) => {
-        if (err) { return console.log(err); }
-        consumption = res.body;
-    }) */
+    /*     request('http://localhost:3000/', { json: true }, (err, res, body) => {
+            if (err) { return console.log(err); }
+            consumption = res.body;
+        }) */
     return consumption;
 }
 async function getProduction() {
-    request('http://production:3004/', { json: true }, (err, res, body) => {
+    request('http://producer:3004/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         production = res.body;
     });
-/*     request('http://localhost:3004/', { json: true }, (err, res, body) => {
-        if (err) { return console.log(err); }
-        production = res.body;
-    }); */
+    /*     request('http://localhost:3004/', { json: true }, (err, res, body) => {
+            if (err) { return console.log(err); }
+            production = res.body;
+        }); */
     return production;
 }
 async function getModelledPrice() {
@@ -332,10 +332,10 @@ async function getModelledPrice() {
         if (err) { return console.log(err); }
         modelledPrice = res.body;
     })
-/*     request('http://localhost:3002/', { json: true }, (err, res, body) => {
-        if (err) { return console.log(err); }
-        modelledPrice = res.body;
-    }) */
+    /*     request('http://localhost:3002/', { json: true }, (err, res, body) => {
+            if (err) { return console.log(err); }
+            modelledPrice = res.body;
+        }) */
     return modelledPrice;
 }
 async function getPrice() {
@@ -343,10 +343,10 @@ async function getPrice() {
         if (err) { return console.log(err); }
         price = res.body;
     })
-/*     request('http://localhost:3007/', { json: true }, (err, res, body) => {
-        if (err) { return console.log(err); }
-        price = res.body;
-    }) */
+    /*     request('http://localhost:3007/', { json: true }, (err, res, body) => {
+            if (err) { return console.log(err); }
+            price = res.body;
+        }) */
     return price;
 }
 async function getPower() {
@@ -354,10 +354,10 @@ async function getPower() {
         if (err) { return console.log(err); }
         power = res.body;
     })
-/*     request('http://localhost:3006/', { json: true }, (err, res, body) => {
-        if (err) { return console.log(err); }
-        power = res.body;
-    }) */
+    /*     request('http://localhost:3006/', { json: true }, (err, res, body) => {
+            if (err) { return console.log(err); }
+            power = res.body;
+        }) */
     return power;
 }
 
@@ -367,11 +367,11 @@ async function getStatus() {
         isOn = res.body;
         console.log("isOn: " + isOn)
     })
-/*     request('http://localhost:3006/status', { json: true }, (err, res, body) => {
-        if (err) { return console.log(err); }
-        isOn = res.body;
-        console.log("isOn: " + isOn)
-    }) */
+    /*     request('http://localhost:3006/status', { json: true }, (err, res, body) => {
+            if (err) { return console.log(err); }
+            isOn = res.body;
+            console.log("isOn: " + isOn)
+        }) */
     if (isOn) {
         return "running";
     } else {

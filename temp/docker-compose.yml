@@ -52,7 +52,7 @@ services:
   modelledPrice:
     image: modelledprice:latest # Make sure your Docker image has this name.
     ports:
-    - "3002:3002"
+      - "3002:3002"
     stdin_open: true
     tty: true
     deploy:
@@ -66,7 +66,7 @@ services:
   price:
     image: price:latest # Make sure your Docker image has this name.
     ports:
-    - "3007:3007"
+      - "3007:3007"
     stdin_open: true
     tty: true
     deploy:
@@ -79,8 +79,8 @@ services:
         window: 10s
   windspeed:
     image: windspeed:latest # Make sure your Docker image has this name.
-    ports: 
-    - "3001:3001"
+    ports:
+      - "3001:3001"
     stdin_open: true
     tty: true
     deploy:
@@ -93,8 +93,8 @@ services:
         window: 10s
   powerplant:
     image: powerplant:latest # Make sure your Docker image has this name.
-    ports: 
-    - "3006:3006"
+    ports:
+      - "3006:3006"
     stdin_open: true
     tty: true
     deploy:
@@ -105,12 +105,25 @@ services:
         delay: 5s
         max_attempts: 3
         window: 10s
-        
+  producer:
+    image: producer:latest # Make sure your Docker image has this name.
+    ports:
+      - "3004:3004"
+    stdin_open: true
+    tty: true
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 10s
+
 #    ports:
 #      - "4000:80"
 #    networks:
 #      - kademlia_network
-      
+
 #networks:
 #  kademlia_network:
-
