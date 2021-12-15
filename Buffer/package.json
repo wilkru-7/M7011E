@@ -1,10 +1,10 @@
 {
-  "name": "powerplant",
+  "name": "buffer_",
   "version": "1.0.0",
   "description": "",
-  "main": "powerplant.js",
+  "main": "buffer.js",
   "scripts": {
-    "start": "node powerplant.js",
+    "start": "node buffer.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

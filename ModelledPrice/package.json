@@ -1,17 +1,16 @@
 {
-  "name": "prosumer",
+  "name": "modelledprice",
   "version": "1.0.0",
   "description": "",
-  "main": "prosumer.js",
+  "main": "modelledPrice.js",
   "scripts": {
-    "start": "nodemon prosumer.js",
+    "start": "node modelledPrice.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.1",
-    "nodemon": "^2.0.15",
     "request": "^2.88.2"
   }
 }

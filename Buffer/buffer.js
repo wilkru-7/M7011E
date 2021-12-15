@@ -4,7 +4,7 @@ const app = express()
 const port = 3005
 
 var buffer = 0;
-update();
+//update();
 
 app.get('/', (req, res) => {
     res.json(getBuffer());
