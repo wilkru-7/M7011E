@@ -92,7 +92,11 @@ app.get('/getPrice', (req, res) => {
 app.get('/', (req, res) => {
     if (req.session.loggedin) {
         console.log(req.session.loggedin)
-        res.render('index')
+        if (req.session.role == "manager") {
+            res.redirect('admin')
+        } else {
+            res.render('index')
+        }
     } else {
         res.redirect("login")
     }
@@ -112,8 +116,9 @@ app.post('/login', (req, res) => {
     /* TODO:
         Catch and no input should return false */
     login(username, password).catch(console.dir).then(result => {
-        if (result == true) {
+        if (result != "") {
             req.session.loggedin = true;
+            req.session.role = result;
             req.session.username = username;
             loginDB(username)
             res.redirect('/')
@@ -287,7 +292,7 @@ async function insert(_username, _password) {
         await client.connect();
         const database = client.db('M7011E');
         const users = database.collection('Users');
-        const insert = { username: _username, password: _password, buffer: 0 };
+        const insert = { username: _username, password: _password, buffer: 0, role: "prosumer" };
         const result = await users.insertOne(insert);
     } finally {
         await client.close();
