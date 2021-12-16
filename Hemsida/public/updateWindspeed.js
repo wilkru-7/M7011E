@@ -23,7 +23,7 @@ $(document).ready(function () {
            console.log("wind: " + data);
        }
     }).then(function () {
-       setTimeout(updateData, 1000) //call itself every 1000ms
+       setTimeout(updateData, 10000) //call itself every 10000ms
     });
 } */
 async function updateWindspeed() {
@@ -36,7 +36,7 @@ async function updateWindspeed() {
             console.log("wind: " + data);
         }
     }).then(function () {
-        setTimeout(updateWindspeed, 100) //call itself every 100ms
+        setTimeout(updateWindspeed, 1000) //call itself every 1000ms
     });
 }
 async function updateModelledPrice() {
@@ -49,7 +49,7 @@ async function updateModelledPrice() {
             console.log("price:" + data);
         }
     }).then(function () {
-        setTimeout(updateModelledPrice, 100) //call itself every 100ms
+        setTimeout(updateModelledPrice, 1000) //call itself every 1000ms
     });
 }
 
@@ -63,7 +63,7 @@ async function updateProduction() {
             console.log("production: " + data);
         }
     }).then(function () {
-        setTimeout(updateProduction, 100) //call itself every 100ms
+        setTimeout(updateProduction, 1000) //call itself every 1000ms
     });
 }
 
@@ -77,7 +77,7 @@ async function updateConsumption() {
             console.log("consumption: " + data);
         }
     }).then(function () {
-        setTimeout(updateConsumption, 100) //call itself every 100ms
+        setTimeout(updateConsumption, 1000) //call itself every 1000ms
     });
 }
 
@@ -91,7 +91,7 @@ async function updateNetProduction() {
             console.log("netProduction: " + data);
         }
     }).then(function () {
-        setTimeout(updateNetProduction, 100) //call itself every 100ms
+        setTimeout(updateNetProduction, 1000) //call itself every 1000ms
     });
 }
 
@@ -105,6 +105,6 @@ async function updateBuffer() {
             console.log("buffer: " + data);
         }
     }).then(function () {
-        setTimeout(updateBuffer, 100) //call itself every 100ms
+        setTimeout(updateBuffer, 1000) //call itself every 1000ms
     });
 }

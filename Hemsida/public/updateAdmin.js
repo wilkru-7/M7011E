@@ -16,7 +16,7 @@ async function updateBuffer() {
 
         }
     }).then(function () {
-        setTimeout(updateBuffer, 100) //call itself every 100ms
+        setTimeout(updateBuffer, 1000) //call itself every 1000ms
     });
 }
 
@@ -28,7 +28,7 @@ async function updateModelledPrice() {
             $("#modelledPrice").text(price)
         }
     }).then(function () {
-        setTimeout(updateModelledPrice, 100) //call itself every 100ms
+        setTimeout(updateModelledPrice, 1000) //call itself every 1000ms
     });
 }
 
@@ -40,7 +40,7 @@ async function updatePrice() {
             $("#price").text(price)
         }
     }).then(function () {
-        setTimeout(updatePrice, 100) //call itself every 100ms
+        setTimeout(updatePrice, 1000) //call itself every 1000ms
     });
 }
 
@@ -53,7 +53,7 @@ async function updatePower() {
             $("#power").text(power)
         }
     }).then(function () {
-        setTimeout(updatePower, 100) //call itself every 100ms
+        setTimeout(updatePower, 1000) //call itself every 1000ms
     });
 }
 
@@ -65,6 +65,6 @@ async function updateStatus() {
             $("#status").text(status)
         }
     }).then(function () {
-        setTimeout(updateStatus, 100) //call itself every 100ms
+        setTimeout(updateStatus, 1000) //call itself every 1000ms
     });
 }

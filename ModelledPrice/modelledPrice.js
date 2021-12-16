@@ -32,7 +32,10 @@ app.get('/', (req, res) => {
         consumption = res.body;
         console.log(res.body);
     }); */
-    price = consumption * 100 - windSpeed * 5;
+    price = consumption - windSpeed;
+    if (price < 0) {
+        price = 0
+    }
 
     res.json(price.toFixed(2));
     // res.send("Windspeed is: " + windSpeed + " Consumption is: " + consumption + " And price is: " + price);

@@ -5,7 +5,7 @@ const app = express()
 const port = 3000
 
 var consumption = 0;
-var consumptionDistribution = gaussian(11, 2);
+var consumptionDistribution = gaussian(11, 3);
 update();
 
 app.get('/', (req, res) => {

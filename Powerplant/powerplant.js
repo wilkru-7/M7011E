@@ -14,7 +14,7 @@ function startPowerplant() {
 }
 function updatePower() {
     if (isOn) {
-        power += 10;
+        power = 400000;
     }
     setTimeout(updatePower, 1000)
 }
