@@ -46,28 +46,28 @@ app.get('/test', (req, res) => {
 //     res.send(windspeed);
 // })
 app.get('/getWindspeed', (req, res) => {
-    getWindspeed()
-    res.send(windspeed);
+    getWindspeed().then(res.send(windspeed))
+    //res.send(windspeed);
 })
 app.get('/getModelledPrice', (req, res) => {
-    getModelledPrice()
-    res.send(modelledPrice);
+    getModelledPrice().then(res.send(modelledPrice))
+    //res.send(modelledPrice);
 })
 // app.get('/getPrice', (req, res) => {
 //     getPrice()
 //     res.send(price);
 // })
 app.get('/getConsumption', (req, res) => {
-    getConsumption()
-    res.send(consumption);
+    getConsumption().then(res.send(consumption))
+    //res.send(consumption);
 })
 app.get('/getProduction', (req, res) => {
-    getProduction()
-    res.send(production);
+    getProduction().then(res.send(production))
+    //res.send(production);
 })
 app.get('/getNetProduction', (req, res) => {
-    getNetProduction()
-    res.send(netProduction + "");
+    getNetProduction().then(res.send(netProduction + ""))
+    //res.send(netProduction + "");
 })
 app.get('/getBuffer', (req, res) => {
     getBuffer(req.session.username).then(result => {
@@ -80,8 +80,8 @@ app.get('/getUsers', (req, res) => {
     })
 })
 app.get('/getPowerplant', (req, res) => {
-    getPower();
-    res.send(power + "")
+    getPower().then(res.send(power + ""));
+    //res.send(power + "")
 })
 app.get('/getPrice', (req, res) => {
     getPrice().then(result => {
@@ -422,10 +422,10 @@ async function login(_username, _password) {
         var response;
         if (result != null && _password == result.password) {
             console.log("You are logged in")
-            response = true
+            response = result.role
         } else {
             console.log("Wrong password (or wrong username)!!!")
-            response = false
+            response = ""
         }
         return response
     } finally {

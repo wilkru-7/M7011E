@@ -42,7 +42,7 @@ async function updateWindspeed() {
 async function updateModelledPrice() {
     $.ajax({
         type: 'GET',
-        url: '/getModelledPrice',
+        url: '/getPrice',
         success: (data) => {
             //updateData(data);
             $("#modelledPrice").text(data);
