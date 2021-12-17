@@ -17,8 +17,7 @@
 
 ## 1. Create the changes you want to deploy.
 
-## 2. Rebuild the docker container by running for example `docker build -t hemsida .`
-## (note that the name "hemsida "should be replaced with the name of the service, see step 1 in the build instructions for all the names)
+## 2. Rebuild the docker container by running for example `docker build -t hemsida .` (note that the name "hemsida "should be replaced with the name of the service, see step 1 in the build instructions for all the names)
 
 ## 3. Update the container that is used by docker-compose. This can be done either by stopping the service in docker hub and then starting it again (the container that was build the latest will be used when starting it again). The alternative is to stop the deployment and then restart it with the command `docker-compose up` in the temp folder
 
