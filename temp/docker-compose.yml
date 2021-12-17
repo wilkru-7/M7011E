@@ -35,20 +35,20 @@ services:
         delay: 5s
         max_attempts: 3
         window: 10s
-  hemsida:
-    image: hemsida:latest # Make sure your Docker image has this name.
-    ports:
-      - "3003:3003"
-    stdin_open: true
-    tty: true
-    deploy:
-      mode: replicated
-      replicas: 1
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 10s
+#  hemsida:
+#    image: hemsida:latest # Make sure your Docker image has this name.
+#    ports:
+#      - "3003:3003"
+#    stdin_open: true
+#    tty: true
+#    deploy:
+#      mode: replicated
+#      replicas: 1
+#      restart_policy:
+#        condition: on-failure
+#        delay: 5s
+#        max_attempts: 3
+#        window: 10s
   modelledPrice:
     image: modelledprice:latest # Make sure your Docker image has this name.
     ports:

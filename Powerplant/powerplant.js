@@ -1,7 +1,7 @@
 var express = require('express');
 const app = express()
 const port = 3006
-var isOn, buffer, power = 0;
+var isOn, buffer, power, market = 0;
 
 startPowerplant();
 
@@ -36,6 +36,20 @@ app.get('/start', (req, res) => {
 
 app.get('/stop', (req, res) => {
     setStatus(false)
+})
+/* Maybe send to db? */
+app.get('/sellToMarket/:amount', (req, res) => {
+    amount = parseFloat(req.params['amount'])
+    if (amount > 0) {
+        market += amount
+    }
+    console.log("Current market is: " + market);
+    //res.send("req.params")
+})
+app.get('/buyFromMarket/:amount', (req, res) => {
+    amount = req.params['amount']
+    market -= amount
+    //res.send("req.params")
 })
 
 app.listen(port, () => {

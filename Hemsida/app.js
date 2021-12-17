@@ -13,7 +13,7 @@ var modelledPrice, price, windspeed, consumption, production, netProduction, rat
 
 const { MongoClient } = require("mongodb");
 
-const uri = "mongodb://83.209.178.176:27017/M7011E";
+const uri = "mongodb://localhost:27017/";
 const client = new MongoClient(uri);
 
 app.use('/jquery', express.static(__dirname + '/node_modules/jquery/dist/'));
@@ -146,21 +146,21 @@ app.get('/register', (req, res) => {
     res.render('register', {})
 })
 app.get('/admin', (req, res) => {
-    request('http://modelledprice:3002/', { json: true }, (err, res, body) => {
+    request('http://localhost:3002/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         modelledPrice = res.body;
     });
 
-    request('http://windspeed:3001/', { json: true }, (err, res, body) => {
+    request('http://localhost:3001/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         windspeed = res.body;
     });
-    request('http://consumption:3000/', { json: true }, (err, res, body) => {
+    request('http://localhost:3000/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         consumption = res.body;
     });
 
-    request('http://producer:3004/', { json: true }, (err, res, body) => {
+    request('http://localhost:3004/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         production = res.body;
     });
@@ -238,7 +238,7 @@ app.post('/useFromBuffer', (req, res) => {
 })
 
 app.post('/setPrice', (req, res) => {
-    request('http://price:3007/setPrice/' + req.body.setPrice, { json: true }, (err, res, body) => {
+    request('http://localhost:3007/setPrice/' + req.body.setPrice, { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
     });
     /*     request('http://localhost:3007/setPrice/' + req.body.setPrice, { json: true }, (err, res, body) => {
@@ -250,7 +250,7 @@ app.post('/setPrice', (req, res) => {
 app.post('/switch', (req, res) => {
     console.log("req.body.switch :" + req.body.switch)
     if (req.body.switch == "on") {
-        request('http://powerplant:3006/start/', { json: true }, (err, res, body) => {
+        request('http://localhost:3006/start/', { json: true }, (err, res, body) => {
             if (err) {
                 return console.log(err);
             }
@@ -266,7 +266,7 @@ app.post('/switch', (req, res) => {
                     }
                 }); */
     } else {
-        request('http://powerplant:3006/stop/', { json: true }, (err, res, body) => {
+        request('http://localhost:3006/stop/', { json: true }, (err, res, body) => {
             if (err) {
                 return console.log(err);
             }
@@ -300,7 +300,7 @@ async function insert(_username, _password) {
 }
 
 async function getWindspeed() {
-    request('http://windspeed:3001/', { json: true }, (err, res, body) => {
+    request('http://localhost:3001/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         windspeed = res.body;
     });
@@ -311,7 +311,7 @@ async function getWindspeed() {
     return windspeed;
 }
 async function getConsumption() {
-    request('http://consumption:3000/', { json: true }, (err, res, body) => {
+    request('http://localhost:3000/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         consumption = res.body;
     })
@@ -322,7 +322,7 @@ async function getConsumption() {
     return consumption;
 }
 async function getProduction() {
-    request('http://producer:3004/', { json: true }, (err, res, body) => {
+    request('http://localhost:3004/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         production = res.body;
     });
@@ -333,7 +333,7 @@ async function getProduction() {
     return production;
 }
 async function getModelledPrice() {
-    request('http://modelledprice:3002/', { json: true }, (err, res, body) => {
+    request('http://localhost:3002/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         modelledPrice = res.body;
     })
@@ -344,7 +344,7 @@ async function getModelledPrice() {
     return modelledPrice;
 }
 async function getPrice() {
-    request('http://price:3007/', { json: true }, (err, res, body) => {
+    request('http://localhost:3007/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         price = res.body;
     })
@@ -355,7 +355,7 @@ async function getPrice() {
     return price;
 }
 async function getPower() {
-    request('http://powerplant:3006/', { json: true }, (err, res, body) => {
+    request('http://localhost:3006/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         power = res.body;
     })
@@ -367,7 +367,7 @@ async function getPower() {
 }
 
 async function getStatus() {
-    request('http://powerplant:3006/status', { json: true }, (err, res, body) => {
+    request('http://localhost:3006/status', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         isOn = res.body;
         console.log("isOn: " + isOn)
@@ -398,17 +398,33 @@ async function getBuffer(username) {
     getNetProduction().then(netProduction => {
         getBufferForUser(username).then(bufferTemp => {
             if (!isNaN(netProduction) && bufferTemp != undefined) {
-                buffer = (parseFloat(bufferTemp) + parseFloat(ratio1 * netProduction)).toFixed(2)
-                console.log("IN BUFFER:")
-                console.log("bufferTemp: " + bufferTemp)
-                console.log("netProduction: " + netProduction)
-                console.log("buffer: " + typeof buffer)
+                //Over-Production
+                if (netProduction >= 0) {
+                    var toBuffer = parseFloat(ratio1 * netProduction)
+                    var toMarket = netProduction - toBuffer
+                    buffer = (parseFloat(bufferTemp) + toBuffer).toFixed(2)
+                }
+                //In case of excessive production, Prosumer should be 
+                //able to control the ratio of how much should be 
+                //sold to the market and how much should be sent to 
+                //the buffer
+                else {
+                    var fromBuffer = parseFloat(ratio2 * netProduction)
+                    var toMarket = netProduction - fromBuffer
+                    buffer = (parseFloat(bufferTemp) + fromBuffer).toFixed(2)
+                }
                 setBufferForUser(username, buffer)
+                sendToMarket(toMarket);
                 return buffer;
             } else {
                 return 0;
             }
         })
+    })
+}
+async function sendToMarket(toMarket) {
+    request('http://localhost:3006/sellToMarket/' + toMarket, { json: true }, (err, res, body) => {
+        if (err) { return console.log(err); }
     })
 }
 
