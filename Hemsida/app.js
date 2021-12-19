@@ -3,6 +3,10 @@ var express = require('express');
 var path = require('path');
 var ejs = require('ejs');
 var $ = require('jquery')
+
+var bcrypt = require('bcrypt');
+const saltRounds = 10;
+
 var bodyParser = require('body-parser');
 var session = require('express-session');
 const fileUpload = require('express-fileupload');
@@ -12,6 +16,7 @@ const port = 3003
 var modelledPrice, price, windspeed, consumption, production, netProduction, ratio1 = 0.5, ratio2 = 0.5, buffer, users, power, isOn;
 
 const { MongoClient } = require("mongodb");
+const { syncBuiltinESMExports } = require('module');
 
 const uri = "mongodb://localhost:27017/";
 const client = new MongoClient(uri);
@@ -113,19 +118,21 @@ app.post('/login', (req, res) => {
         Check input so no hacking */
     var username = req.body.username;
     var password = req.body.password;
-    /* TODO:
-        Catch and no input should return false */
-    login(username, password).catch(console.dir).then(result => {
-        if (result != "") {
-            req.session.loggedin = true;
-            req.session.role = result;
-            req.session.username = username;
-            loginDB(username)
-            res.redirect('/')
-        }
-        else {
-            res.redirect('login')
-        }
+    login(username).then(result => {
+        bcrypt.compare(password, result, function(err, response) {
+            if (err){
+                // handle error
+            }
+            if (response){
+                // Send JWT
+                req.session.loggedin = true;
+                req.session.role = result;
+                req.session.username = username;
+                res.redirect('/')
+            } else {
+                res.redirect('login')
+            }
+            });
     })
 })
 app.post('/redirectregister', (req, res) => {
@@ -164,24 +171,6 @@ app.get('/admin', (req, res) => {
         if (err) { return console.log(err); }
         production = res.body;
     });
-    /*     request('http://localhost:3002/', { json: true }, (err, res, body) => {
-            if (err) { return console.log(err); }
-            modelledPrice = res.body;
-        });
-    
-        request('http://localhost:3001/', { json: true }, (err, res, body) => {
-            if (err) { return console.log(err); }
-            windspeed = res.body;
-        });
-        request('http://localhost:3000/', { json: true }, (err, res, body) => {
-            if (err) { return console.log(err); }
-            consumption = res.body;
-        });
-    
-        request('http://localhost:3004/', { json: true }, (err, res, body) => {
-            if (err) { return console.log(err); }
-            production = res.body;
-        }); */
 
     netProduction = (consumption - production).toFixed(2)
 
@@ -204,8 +193,11 @@ app.post('/register', (req, res) => {
 
     search(username).then(exists => {
         if (exists && password == password2) {
-            insert(username, password)
-            res.redirect('/login')
+            bcrypt.hash(password, saltRounds, (err, hash) => {
+                // Now we can store the password hash in db.
+                insert(username, hash)
+                res.redirect('/login')
+            });
         } else {
             console.log("Something was entered wrong")
             res.redirect('/register')
@@ -241,9 +233,6 @@ app.post('/setPrice', (req, res) => {
     request('http://localhost:3007/setPrice/' + req.body.setPrice, { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
     });
-    /*     request('http://localhost:3007/setPrice/' + req.body.setPrice, { json: true }, (err, res, body) => {
-            if (err) { return console.log(err); }
-        }); */
     price = req.body.setPrice
 })
 
@@ -255,32 +244,13 @@ app.post('/switch', (req, res) => {
                 return console.log(err);
             }
         });
-        /*         request('http://localhost:3006/start/', { json: true }, (err, res, body) => {
-                    if (err) {
-                        return console.log(err);
-                    }
-                }); */
-        /*         request('http://localhost:3006/start/', { json: true }, (err, res, body) => {
-                    if (err) {
-                        return console.log(err);
-                    }
-                }); */
     } else {
         request('http://localhost:3006/stop/', { json: true }, (err, res, body) => {
             if (err) {
                 return console.log(err);
             }
         });
-        /*         request('http://localhost:3006/stop/', { json: true }, (err, res, body) => {
-                    if (err) {
-                        return console.log(err);
-                    }
-                }); */
     }
-    // request('http://localhost:3006/setPrice/' + req.body.setPrice, { json: true }, (err, res, body) => {
-    //     if (err) { return console.log(err); }
-    // });
-    // price = req.body.setPrice
 })
 
 app.listen(port, () => {
@@ -304,10 +274,6 @@ async function getWindspeed() {
         if (err) { return console.log(err); }
         windspeed = res.body;
     });
-    /*     request('http://localhost:3001/', { json: true }, (err, res, body) => {
-            if (err) { return console.log(err); }
-            windspeed = res.body;
-        }); */
     return windspeed;
 }
 async function getConsumption() {
@@ -315,10 +281,6 @@ async function getConsumption() {
         if (err) { return console.log(err); }
         consumption = res.body;
     })
-    /*     request('http://localhost:3000/', { json: true }, (err, res, body) => {
-            if (err) { return console.log(err); }
-            consumption = res.body;
-        }) */
     return consumption;
 }
 async function getProduction() {
@@ -326,10 +288,6 @@ async function getProduction() {
         if (err) { return console.log(err); }
         production = res.body;
     });
-    /*     request('http://localhost:3004/', { json: true }, (err, res, body) => {
-            if (err) { return console.log(err); }
-            production = res.body;
-        }); */
     return production;
 }
 async function getModelledPrice() {
@@ -337,10 +295,6 @@ async function getModelledPrice() {
         if (err) { return console.log(err); }
         modelledPrice = res.body;
     })
-    /*     request('http://localhost:3002/', { json: true }, (err, res, body) => {
-            if (err) { return console.log(err); }
-            modelledPrice = res.body;
-        }) */
     return modelledPrice;
 }
 async function getPrice() {
@@ -348,10 +302,6 @@ async function getPrice() {
         if (err) { return console.log(err); }
         price = res.body;
     })
-    /*     request('http://localhost:3007/', { json: true }, (err, res, body) => {
-            if (err) { return console.log(err); }
-            price = res.body;
-        }) */
     return price;
 }
 async function getPower() {
@@ -359,10 +309,6 @@ async function getPower() {
         if (err) { return console.log(err); }
         power = res.body;
     })
-    /*     request('http://localhost:3006/', { json: true }, (err, res, body) => {
-            if (err) { return console.log(err); }
-            power = res.body;
-        }) */
     return power;
 }
 
@@ -372,11 +318,6 @@ async function getStatus() {
         isOn = res.body;
         console.log("isOn: " + isOn)
     })
-    /*     request('http://localhost:3006/status', { json: true }, (err, res, body) => {
-            if (err) { return console.log(err); }
-            isOn = res.body;
-            console.log("isOn: " + isOn)
-        }) */
     if (isOn) {
         return "running";
     } else {
@@ -428,22 +369,14 @@ async function sendToMarket(toMarket) {
     })
 }
 
-async function login(_username, _password) {
+async function login(_username) {
     try {
         await client.connect();
         const database = client.db('M7011E');
         const users = database.collection('Users');
         const search = { username: _username };
         const result = await users.findOne(search);
-        var response;
-        if (result != null && _password == result.password) {
-            console.log("You are logged in")
-            response = result.role
-        } else {
-            console.log("Wrong password (or wrong username)!!!")
-            response = ""
-        }
-        return response
+        return result.password
     } finally {
         await client.close();
     }
@@ -518,10 +451,6 @@ async function getBufferForUser(_username) {
         const database = client.db('M7011E');
         const users = database.collection('Users');
         const search = { username: _username };
-        // await users.findOne(search).then(user => {
-        //     console.log("user.buffer: " + user.buffer)
-        //     return user.buffer;
-        // });
         var user = await users.findOne(search)
         console.log("user.buffer: " + user.buffer)
         return user.buffer;
