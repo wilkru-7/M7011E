@@ -5,6 +5,7 @@ $(document).ready(function () {
     updateProduction()
     updateNetProduction()
     updateBuffer()
+    updateImg()
 });
 /* {
     "Data":[
@@ -107,4 +108,16 @@ async function updateBuffer() {
     }).then(function () {
         setTimeout(updateBuffer, 1000) //call itself every 1000ms
     });
+}
+
+async function updateImg() {
+    $.ajax({
+        type: 'GET',
+        url: '/getImg',
+        success: (data) => {
+            console.log("data: " + data)
+            //updateData(data);
+            $("#img").attr('src', data);
+        }
+    })
 }

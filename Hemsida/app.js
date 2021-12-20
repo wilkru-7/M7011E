@@ -3,6 +3,7 @@ var express = require('express');
 var path = require('path');
 var ejs = require('ejs');
 var $ = require('jquery')
+var fs = require('fs');
 
 var bcrypt = require('bcrypt');
 const saltRounds = 10;
@@ -32,6 +33,7 @@ app.use(
 );
 
 app.use(express.static('public'));
+app.use(express.static('public/images'));
 
 /* TODO:
   Change secret to something(?)  */
@@ -211,14 +213,28 @@ app.post('/imageupload', (req, res) => {
         return res.status(400).send("No files were uploaded.");
     }
     const file = req.files.filename;
-    const path = __dirname + "/files/" + file.name;
 
-    file.mv(path, (err) => {
-        if (err) {
-            return res.status(500).send(err);
-        }
-        return res.send({ status: "success", path: path });
-    });
+    insertImg(req.session.username, file).then(() => {
+        //return res.send({ status: "success", path: path });
+        res.redirect('/')
+    })
+})
+app.get('/getImg', (req, res) => {
+    console.log("1")
+    getImg(req.session.username).then(imgPath => {
+        console.log("imgPath: " + imgPath)
+        res.send(imgPath)
+/*         const path = __dirname + "/files/" + img.name;
+        img.mv(path, (err) => {
+            console.log("3")
+            if (err) {
+                return res.status(500).send(err);
+            }
+        }); */
+/*         return img */
+    })
+    
+
 })
 
 app.post('/sendToBuffer', (req, res) => {
@@ -483,6 +499,46 @@ async function deleteUser(_username) {
         const users = database.collection('Users');
         const search = { username: _username };
         await users.deleteOne(search);
+    } finally {
+        await client.close();
+    }
+}
+async function insertImg(_username, file) {
+    try {
+        await client.connect();
+        const database = client.db('M7011E');
+        const users = database.collection('Users');
+        const filter = { username: _username };
+        const options = { upsert: true };
+        const updateDoc = {
+            $set: {
+                img: file
+            },
+        };
+        const result = await users.updateOne(filter, updateDoc, options);
+        return result;
+    } finally {
+        await client.close();
+    }
+}
+async function getImg(_username){
+    try {
+        await client.connect();
+        const database = client.db('M7011E');
+        const users = database.collection('Users');
+        const search = { username: _username };
+        var user =await users.findOne(search)
+
+        var path = __dirname + "/public/images/" + user.img.name;
+        var path2 = "images/" + user.img.name;
+        const buffer = Buffer.from(user.img.data.toString('base64'), 'base64');
+        fs.writeFile(path.toString(), buffer, err => {
+            if(err){
+                console.log(err)
+            }
+        })
+        return path2;
+        
     } finally {
         await client.close();
     }
