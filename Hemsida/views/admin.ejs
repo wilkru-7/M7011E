@@ -50,45 +50,7 @@
                 </tr>
             </thead>
             <tbody id="users">
-                <% for(var i=0; i<users.length; i++) {%>
-                    <tr>
-                        <th scrope="row">
-                            <%= i %>
-                        </th>
-                        <td>
-                            <%= users[i].username %>
-                        </td>
-                        <td>
-                            <%= users[i].role %>
-                        </td>
-                        <td>
-                            <%= users[i].status %>
-                        </td>
-                        <td></td>
-                        <td></td>
-                        <td id=<%=i %>>
-                            <!-- <%= users[i].buffer %> -->
-                        </td>
-                        <td>
-                            <form method="POST">
-                                <input type="hidden" name="username" value=<%=users[i].username %>>
-                                <input type="submit" value="Block">
-                            </form>
-                        </td>
-                        <td>
-                            <form method="POST">
-                                <input type="hidden" name="username" value=<%=users[i].username %>>
-                                <input type="submit" value="Update">
-                            </form>
-                        </td>
-                        <td>
-                            <form method="POST">
-                                <input type="hidden" name="username" value=<%=users[i].username %>>
-                                <input type="submit" value="Delete" formaction="/delete">
-                            </form>
-                        </td>
-                    </tr>
-                    <% } %>
+
             </tbody>
         </table>
     </div>
@@ -113,9 +75,6 @@
                     <h6>Market demand</h6>
                 </div>
                 <div class="card-body text-center">
-                    <!-- <p id="wind">
-                        <%= windspeed %>
-                    </p> -->
                 </div>
             </div>
 
@@ -237,7 +196,6 @@
                         <label for="buffer">Buffer</label>
                         <meter id="buffer" value="0.1">2%</meter>
 
-                        <!-- <%= windspeed %> -->
                     </p>
                     <div class="div text-center">
                         <h6>3%</h6>
@@ -280,6 +238,9 @@
             <input type="file" name="filename">
             <input type="submit">
         </form>
+    </div>
+    <div>
+        <img id="img" width="300" height="300" src="">
     </div>
 
 </body>

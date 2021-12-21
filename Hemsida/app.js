@@ -14,13 +14,17 @@ const fileUpload = require('express-fileupload');
 
 const app = express()
 const port = 3003
-var modelledPrice, price, windspeed, consumption, production, netProduction, ratio1 = 0.5, ratio2 = 0.5, buffer, users, power, isOn;
+var modelledPrice, price, windspeed, consumption, production, netProduction, ratio1 = 0.5, ratio2 = 0.5, buffer, power, isOn;
 
 const { MongoClient } = require("mongodb");
 const { syncBuiltinESMExports } = require('module');
 
 const uri = "mongodb://localhost:27017/";
 const client = new MongoClient(uri);
+
+client.connect();
+const database = client.db('M7011E');
+const users = database.collection('Users');
 
 app.use('/jquery', express.static(__dirname + '/node_modules/jquery/dist/'));
 
@@ -121,20 +125,21 @@ app.post('/login', (req, res) => {
     var username = req.body.username;
     var password = req.body.password;
     login(username).then(result => {
-        bcrypt.compare(password, result, function(err, response) {
-            if (err){
+        bcrypt.compare(password, result.password, function (err, response) {
+            if (err) {
                 // handle error
             }
-            if (response){
+            if (response) {
                 // Send JWT
                 req.session.loggedin = true;
-                req.session.role = result;
+                console.log("result: " + result.role)
+                req.session.role = result.role;
                 req.session.username = username;
                 res.redirect('/')
             } else {
                 res.redirect('login')
             }
-            });
+        });
     })
 })
 app.post('/redirectregister', (req, res) => {
@@ -155,34 +160,39 @@ app.get('/register', (req, res) => {
     res.render('register', {})
 })
 app.get('/admin', (req, res) => {
-    request('http://localhost:3002/', { json: true }, (err, res, body) => {
-        if (err) { return console.log(err); }
-        modelledPrice = res.body;
-    });
+    if (req.session.role == "manager") {
+        res.render('admin')
+    } else {
+        res.redirect('/')
+    }
+    /*     request('http://localhost:3002/', { json: true }, (err, res, body) => {
+            if (err) { return console.log(err); }
+            modelledPrice = res.body;
+        });
+    
+        request('http://localhost:3001/', { json: true }, (err, res, body) => {
+            if (err) { return console.log(err); }
+            windspeed = res.body;
+        });
+        request('http://localhost:3000/', { json: true }, (err, res, body) => {
+            if (err) { return console.log(err); }
+            consumption = res.body;
+        });
+    
+        request('http://localhost:3004/', { json: true }, (err, res, body) => {
+            if (err) { return console.log(err); }
+            production = res.body;
+        });
+    
+        netProduction = (consumption - production).toFixed(2)
+    
+        buffer += netProduction; */
 
-    request('http://localhost:3001/', { json: true }, (err, res, body) => {
-        if (err) { return console.log(err); }
-        windspeed = res.body;
-    });
-    request('http://localhost:3000/', { json: true }, (err, res, body) => {
-        if (err) { return console.log(err); }
-        consumption = res.body;
-    });
-
-    request('http://localhost:3004/', { json: true }, (err, res, body) => {
-        if (err) { return console.log(err); }
-        production = res.body;
-    });
-
-    netProduction = (consumption - production).toFixed(2)
-
-    buffer += netProduction;
-
-    findUsers().then(value => {
+    /* findUsers().then(value => {
         res.render('admin', {
             users: value, modelledPrice: modelledPrice, windspeed: windspeed, consumption: consumption, production: production, netProduction: netProduction
         })
-    });
+    }); */
 })
 app.post('/delete', (req, res) => {
     var username = req.body.username;
@@ -224,16 +234,16 @@ app.get('/getImg', (req, res) => {
     getImg(req.session.username).then(imgPath => {
         console.log("imgPath: " + imgPath)
         res.send(imgPath)
-/*         const path = __dirname + "/files/" + img.name;
-        img.mv(path, (err) => {
-            console.log("3")
-            if (err) {
-                return res.status(500).send(err);
-            }
-        }); */
-/*         return img */
+        /*         const path = __dirname + "/files/" + img.name;
+                img.mv(path, (err) => {
+                    console.log("3")
+                    if (err) {
+                        return res.status(500).send(err);
+                    }
+                }); */
+        /*         return img */
     })
-    
+
 
 })
 
@@ -274,15 +284,9 @@ app.listen(port, () => {
 })
 
 async function insert(_username, _password) {
-    try {
-        await client.connect();
-        const database = client.db('M7011E');
-        const users = database.collection('Users');
-        const insert = { username: _username, password: _password, buffer: 0, role: "prosumer" };
-        const result = await users.insertOne(insert);
-    } finally {
-        await client.close();
-    }
+
+    const insert = { username: _username, password: _password, buffer: 0, role: "prosumer" };
+    const result = await users.insertOne(insert);
 }
 
 async function getWindspeed() {
@@ -292,6 +296,7 @@ async function getWindspeed() {
     });
     return windspeed;
 }
+
 async function getConsumption() {
     request('http://localhost:3000/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
@@ -386,160 +391,94 @@ async function sendToMarket(toMarket) {
 }
 
 async function login(_username) {
-    try {
-        await client.connect();
-        const database = client.db('M7011E');
-        const users = database.collection('Users');
-        const search = { username: _username };
-        const result = await users.findOne(search);
-        return result.password
-    } finally {
-        await client.close();
-    }
+    const search = { username: _username };
+    const result = await users.findOne(search);
+    return result
 }
 
 async function search(_username) {
-    try {
-        await client.connect();
-        const database = client.db('M7011E');
-        const users = database.collection('Users');
-        const search = { username: _username };
-        const result = await users.findOne(search);
-        if (result == null) {
-            return true
-        } else {
-            return false
-        }
-    } finally {
-        await client.close();
+    const search = { username: _username };
+    const result = await users.findOne(search);
+    if (result == null) {
+        return true
+    } else {
+        return false
     }
 }
 async function loginDB(_username) {
-    try {
-        await client.connect();
-        const database = client.db('M7011E');
-        const users = database.collection('Users');
-        const filter = { username: _username };
-        const options = { upsert: true };
-        const updateDoc = {
-            $set: {
-                status: "Online"
-            },
-        };
-        const result = await users.updateOne(filter, updateDoc, options);
-        return result;
-    } finally {
-        await client.close();
-    }
+    const filter = { username: _username };
+    const options = { upsert: true };
+    const updateDoc = {
+        $set: {
+            status: "Online"
+        },
+    };
+    const result = await users.updateOne(filter, updateDoc, options);
+    return result;
 }
 async function logoutDB(_username) {
-    try {
-        await client.connect();
-        const database = client.db('M7011E');
-        const users = database.collection('Users');
-        const filter = { username: _username };
-        const options = { upsert: true };
-        const updateDoc = {
-            $set: {
-                status: "Offline"
-            },
-        };
-        const result = await users.updateOne(filter, updateDoc, options);
-        return result;
-    } finally {
-        await client.close();
-    }
+    const filter = { username: _username };
+    const options = { upsert: true };
+    const updateDoc = {
+        $set: {
+            status: "Offline"
+        },
+    };
+    const result = await users.updateOne(filter, updateDoc, options);
+    return result;
 }
 async function findUsers() {
-    try {
-        await client.connect();
-        const database = client.db('M7011E');
-        const users = database.collection('Users');
-        result = await users.find().toArray();
-        return result;
-    } finally {
-        await client.close();
-    }
+    result = await users.find().toArray();
+    return result;
 }
 async function getBufferForUser(_username) {
-    try {
-        await client.connect();
-        const database = client.db('M7011E');
-        const users = database.collection('Users');
-        const search = { username: _username };
-        var user = await users.findOne(search)
-        console.log("user.buffer: " + user.buffer)
-        return user.buffer;
-    } finally {
-        await client.close();
-    }
+    const search = { username: _username };
+    var user = await users.findOne(search)
+    console.log("user.buffer: " + user.buffer)
+    return user.buffer;
 }
 async function setBufferForUser(_username, buffer) {
-    try {
-        await client.connect();
-        const database = client.db('M7011E');
-        const users = database.collection('Users');
-        const filter = { username: _username };
-        const options = { upsert: true };
-        const updateDoc = {
-            $set: {
-                buffer: buffer
-            },
-        };
-        const result = await users.updateOne(filter, updateDoc, options);
-        return result;
-    } finally {
-        await client.close();
-    }
+    const filter = { username: _username };
+    const options = { upsert: true };
+    const updateDoc = {
+        $set: {
+            buffer: buffer
+        },
+    };
+    const result = await users.updateOne(filter, updateDoc, options);
+    return result;
 }
-async function deleteUser(_username) {
-    try {
-        await client.connect();
-        const database = client.db('M7011E');
-        const users = database.collection('Users');
-        const search = { username: _username };
-        await users.deleteOne(search);
-    } finally {
-        await client.close();
-    }
-}
-async function insertImg(_username, file) {
-    try {
-        await client.connect();
-        const database = client.db('M7011E');
-        const users = database.collection('Users');
-        const filter = { username: _username };
-        const options = { upsert: true };
-        const updateDoc = {
-            $set: {
-                img: file
-            },
-        };
-        const result = await users.updateOne(filter, updateDoc, options);
-        return result;
-    } finally {
-        await client.close();
-    }
-}
-async function getImg(_username){
-    try {
-        await client.connect();
-        const database = client.db('M7011E');
-        const users = database.collection('Users');
-        const search = { username: _username };
-        var user =await users.findOne(search)
 
+async function deleteUser(_username) {
+    const search = { username: _username };
+    await users.deleteOne(search);
+}
+
+async function insertImg(_username, file) {
+    const filter = { username: _username };
+    const options = { upsert: true };
+    const updateDoc = {
+        $set: {
+            img: file
+        },
+    };
+    const result = await users.updateOne(filter, updateDoc, options);
+    return result;
+}
+
+async function getImg(_username) {
+    const search = { username: _username };
+    var user = await users.findOne(search)
+
+    if (user.img) {
         var path = __dirname + "/public/images/" + user.img.name;
         var path2 = "images/" + user.img.name;
         const buffer = Buffer.from(user.img.data.toString('base64'), 'base64');
         fs.writeFile(path.toString(), buffer, err => {
-            if(err){
+            if (err) {
                 console.log(err)
             }
         })
         return path2;
-        
-    } finally {
-        await client.close();
     }
 }
