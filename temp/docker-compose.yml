@@ -1,0 +1,129 @@
+# See https://docs.docker.com/compose/compose-file/ for information about what
+# commands you can use in this file.
+#
+# Note that you must use the `docker stack deploy` command, with any required
+# command line flags, in order to actually get any replicas started. That
+# command requires that a docker swarm is already running in order to function.
+
+version: "3"
+services:
+  buffer:
+    image: buffer:latest # Make sure your Docker image has this name.
+    ports:
+      - "3005:3005"
+    stdin_open: true
+    tty: true
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 10s
+  consumption:
+    image: consumption:latest # Make sure your Docker image has this name.
+    ports:
+      - "3000:3000"
+    stdin_open: true
+    tty: true
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 10s
+#  hemsida:
+#    image: hemsida:latest # Make sure your Docker image has this name.
+#    ports:
+#      - "3003:3003"
+#    stdin_open: true
+#    tty: true
+#    deploy:
+#      mode: replicated
+#      replicas: 1
+#      restart_policy:
+#        condition: on-failure
+#        delay: 5s
+#        max_attempts: 3
+#        window: 10s
+  modelledPrice:
+    image: modelledprice:latest # Make sure your Docker image has this name.
+    ports:
+      - "3002:3002"
+    stdin_open: true
+    tty: true
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 10s
+  price:
+    image: price:latest # Make sure your Docker image has this name.
+    ports:
+      - "3007:3007"
+    stdin_open: true
+    tty: true
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 10s
+  windspeed:
+    image: windspeed:latest # Make sure your Docker image has this name.
+    ports:
+      - "3001:3001"
+    stdin_open: true
+    tty: true
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 10s
+  powerplant:
+    image: powerplant:latest # Make sure your Docker image has this name.
+    ports:
+      - "3006:3006"
+    stdin_open: true
+    tty: true
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 10s
+  producer:
+    image: producer:latest # Make sure your Docker image has this name.
+    ports:
+      - "3004:3004"
+    stdin_open: true
+    tty: true
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 10s
+
+#    ports:
+#      - "4000:80"
+#    networks:
+#      - kademlia_network
+
+#networks:
+#  kademlia_network:

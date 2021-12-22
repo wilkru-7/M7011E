@@ -1,7 +1,7 @@
 var gaussian = require('gaussian');
 const express = require('express')
 
-var distributionYear = gaussian(4, 2);
+var distributionYear = gaussian(6, 2);
 var windSpeed = 0;
 var meanDay = distributionYear.ppf(Math.random());
 var distributionDay = gaussian(meanDay, 2);

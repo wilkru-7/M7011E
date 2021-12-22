@@ -1,17 +1,15 @@
 {
-  "name": "prosumer",
+  "name": "buffer_",
   "version": "1.0.0",
   "description": "",
-  "main": "prosumer.js",
+  "main": "buffer.js",
   "scripts": {
-    "start": "nodemon prosumer.js",
+    "start": "node buffer.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.17.1",
-    "nodemon": "^2.0.15",
-    "request": "^2.88.2"
+    "express": "^4.17.1"
   }
 }
