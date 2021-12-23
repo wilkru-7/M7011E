@@ -1,1 +1,0 @@
-COPY package*.json ./
