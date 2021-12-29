@@ -1,12 +1,19 @@
 var express = require('express');
 const app = express()
 const port = 3006
-var isOn, buffer, power, market = 0;
+var isOn, buffer, power, market = 0, status;
 
 startPowerplant();
 
-function setStatus(status) {
-    isOn = status
+async function setStatus(_status) {
+    if(_status){
+        status = "Starting"
+        await new Promise(resolve => setTimeout(resolve, 5000));
+        status = "Running"
+    } else {
+        status = "Stopped"
+    }
+    isOn = _status
 }
 function startPowerplant() {
     setStatus(true)
@@ -27,7 +34,7 @@ app.get('/', (req, res) => {
 })
 
 app.get('/status', (req, res) => {
-    res.send(isOn + "")
+    res.send(status + "")
 })
 
 app.get('/start', (req, res) => {

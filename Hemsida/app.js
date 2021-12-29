@@ -240,13 +240,13 @@ app.post('/setPrice', (req, res) => {
 app.post('/switch', (req, res) => {
     console.log("req.body.switch :" + req.body.switch)
     if (req.body.switch == "on") {
-        request('http://powerplant:3006/start/', { json: true }, (err, res, body) => {
+        request('http://localhost:3006/start/', { json: true }, (err, res, body) => {
             if (err) {
                 return console.log(err);
             }
         });
     } else {
-        request('http://powerplant:3006/stop/', { json: true }, (err, res, body) => {
+        request('http://localhost:3006/stop/', { json: true }, (err, res, body) => {
             if (err) {
                 return console.log(err);
             }
@@ -300,7 +300,7 @@ async function getPrice() {
     return price;
 }
 async function getPower() {
-    request('http://powerplant:3006/', { json: true }, (err, res, body) => {
+    request('http://localhost:3006/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         power = res.body;
     })
@@ -308,16 +308,13 @@ async function getPower() {
 }
 
 async function getStatus() {
-    request('http://powerplant:3006/status', { json: true }, (err, res, body) => {
+    request('http://localhost:3006/status', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         isOn = res.body;
+        
         console.log("isOn: " + isOn)
     })
-    if (isOn) {
-        return "running";
-    } else {
-        return "stopped";
-    }
+    return isOn;
 }
 
 async function getNetProduction(username) {
@@ -359,7 +356,7 @@ async function getBuffer(username) {
     })
 }
 async function sendToMarket(toMarket) {
-    request('http://powerplant:3006/sellToMarket/' + toMarket, { json: true }, (err, res, body) => {
+    request('http://localhost:3006/sellToMarket/' + toMarket, { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
     })
 }
