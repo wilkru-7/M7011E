@@ -12,7 +12,7 @@ app.get('/start', (req, res) => {
 app.get('/', (req, res) => {
     
     /* res.json(getWindSpeed()); */
-    request('http://windspeed:3001/', { json: true }, (err, res, body) => {
+    request('http://localhost:3001/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         windSpeed = res.body;
         console.log(res.body);

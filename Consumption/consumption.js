@@ -5,7 +5,7 @@ var gaussian = require('gaussian');
 const client = new Influx('http://127.0.0.1:8086/'); */
 
 const { MongoClient } = require("mongodb");
-const uri = "mongodb://130.240.200.67:27017/";
+const uri = "mongodb://localhost:27017/";
 const client = new MongoClient(uri);
 client.connect();
 const database = client.db('M7011E');
@@ -74,6 +74,6 @@ async function getUserConsumption(_username) {
     const search = { username: _username };
     var user = await users.findOne(search)
     if(user.consumption){
-        return user.consumption
+         return user.consumption
     }
 }

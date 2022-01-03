@@ -57,11 +57,11 @@ app.get('/test', (req, res) => {
 //     res.send(windspeed);
 // })
 app.get('/getWindspeed', (req, res) => {
-    getWindspeed().then(res.send(windspeed))
+    getWindspeed().then(res.send(windspeed + ""))
     //res.send(windspeed);
 })
 app.get('/getModelledPrice', (req, res) => {
-    getModelledPrice().then(res.send(modelledPrice))
+    getModelledPrice().then(res.send(modelledPrice + ""))
     //res.send(modelledPrice);
 })
 // app.get('/getPrice', (req, res) => {
@@ -69,11 +69,11 @@ app.get('/getModelledPrice', (req, res) => {
 //     res.send(price);
 // })
 app.get('/getConsumption', (req, res) => {
-    getConsumption(req.session.username).then(res.send(consumption))
+    getConsumption(req.session.username).then(res.send(consumption + ""))
     //res.send(consumption);
 })
 app.get('/getProduction', (req, res) => {
-    getProduction().then(res.send(production))
+    getProduction().then(res.send(production + ""))
     //res.send(production);
 })
 app.get('/getNetProduction', (req, res) => {
@@ -180,7 +180,7 @@ app.post('/register', (req, res) => {
             bcrypt.hash(password, saltRounds, (err, hash) => {
                 // Now we can store the password hash in db.
                 insert(username, hash)
-                request('http://consumption:3000/startUser/' + username, { json: true }, (err, res, body) => {
+                request('http://localhost:3000/startUser/' + username, { json: true }, (err, res, body) => {
                     if (err) { return console.log(err); }
                 });
                 res.redirect('/login')
@@ -231,7 +231,7 @@ app.post('/useFromBuffer', (req, res) => {
 })
 
 app.post('/setPrice', (req, res) => {
-    request('http://price:3007/setPrice/' + req.body.setPrice, { json: true }, (err, res, body) => {
+    request('http://localhost:3007/setPrice/' + req.body.setPrice, { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
     });
     price = req.body.setPrice
@@ -264,7 +264,7 @@ async function insert(_username, _password) {
 }
 
 async function getWindspeed() {
-    request('http://windspeed:3001/', { json: true }, (err, res, body) => {
+    request('http://localhost:3001/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         windspeed = res.body;
     });
@@ -272,28 +272,31 @@ async function getWindspeed() {
 }
 
 async function getConsumption(username) {
-    request('http://consumption:3000/getUser/' + username, { json: true }, (err, res, body) => {
-        if (err) { return console.log(err); }
-        consumption = res.body;
-    })
-    return consumption;
+    if(username != undefined){
+        console.log("Username: " + username)
+        request('http://localhost:3000/getUser/' + username, { json: true }, (err, res, body) => {
+            if (err) { return console.log(err); }
+            consumption = res.body;
+        })
+        return consumption;
+    }
 }
 async function getProduction() {
-    request('http://production:3004/', { json: true }, (err, res, body) => {
+    request('http://localhost:3004/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         production = res.body;
     });
     return production;
 }
 async function getModelledPrice() {
-    request('http://modelledprice:3002/', { json: true }, (err, res, body) => {
+    request('http://localhost:3002/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         modelledPrice = res.body;
     })
     return modelledPrice;
 }
 async function getPrice() {
-    request('http://price:3007/', { json: true }, (err, res, body) => {
+    request('http://localhost:3007/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         price = res.body;
     })
@@ -318,12 +321,17 @@ async function getStatus() {
 }
 
 async function getNetProduction(username) {
+    console.log("Username: " + username)
     consumption = await getConsumption(username);
+    consumption = parseFloat(consumption)
     console.log("Consumption: " + consumption)
     production = await getProduction();
+    production = parseFloat(production)
     console.log("production:" + production)
-    netProduction = (production - consumption).toFixed(2);
-    console.log("netProduction:" + netProduction)
+    if(!isNaN(production - consumption)) {
+        netProduction = (production - consumption).toFixed(2);
+        console.log("netProduction:" + netProduction)
+    }
     return netProduction;
 }
 
