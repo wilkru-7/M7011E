@@ -168,7 +168,10 @@ app.get('/admin', (req, res) => {
 })
 app.post('/delete', (req, res) => {
     var username = req.body.username;
-    deleteUser(username);
+    deleteUser(username).then(() => {
+        //return res.send({ status: "success", path: path });
+        res.redirect('/admin')
+    })
 })
 app.post('/register', (req, res) => {
     var username = req.body.registerUsername;
