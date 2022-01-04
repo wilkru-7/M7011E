@@ -55,16 +55,15 @@ async function updateBuffer() {
             for (var i = 0; i < users.length; i++) {
                 if(users[i].role == "prosumer") {
                     var trStart = $("<tr>")
-                    var th = $("<th></th>").text(i)
+                    // var th = $("<th></th>").text(i)
                     var tdUserName = $("<td></td>").text(users[i].username)
                     var tdRole = $("<td></td>").text(users[i].role)
                     var tdStatus = $("<td></td>").text(users[i].status)
-                    var tdConsumption = $("<td></td>").text("")
+                    var tdConsumption = $("<td></td>").text(users[i].consumption)
                     var tdProduction = $("<td></td>").text("")
                     var tdBuffer = $("<td></td>").text(users[i].buffer)
 
                     /* Block Button */
-                    var block = []
                     var tdBlock ='<td>'
                     var tdBlock1 ='<form method="POST">'
                     var tdBlock2 = '<input type="hidden" name="username" value="'+ users[i].username + '">'
@@ -89,7 +88,7 @@ async function updateBuffer() {
                     tdDelete = tdDelete.concat(tdDelete1, tdDelete2, tdDelete3, tdDelete4)
 
                     var trEnd = $("</tr>")
-                    $("#users").append(trStart, th, tdUserName, tdRole, tdStatus, tdConsumption, tdProduction, tdBuffer, tdBlock, tdUpdate, tdDelete, trEnd)
+                    $("#users").append(trStart, tdUserName, tdRole, tdStatus, tdConsumption, tdProduction, tdBuffer, tdBlock, tdUpdate, tdDelete, trEnd)
                 }
             }
         }

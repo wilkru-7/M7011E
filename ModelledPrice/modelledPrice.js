@@ -14,7 +14,7 @@ app.get('/', (req, res) => {
 
     request('http://localhost:3001/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
-        windSpeed = res.body;
+        windSpeed = parseFloat(res.body);
         console.log(res.body);
     });
     /* request('http://localhost:3001/', { json: true }, (err, res, body) => {
@@ -24,7 +24,7 @@ app.get('/', (req, res) => {
     }); */
     request('http://localhost:3000/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
-        consumption = res.body;
+        consumption = parseFloat(res.body);
         console.log(res.body);
     });
     /* request('http://localhost:3000/', { json: true }, (err, res, body) => {

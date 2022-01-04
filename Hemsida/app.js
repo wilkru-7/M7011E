@@ -14,7 +14,7 @@ const fileUpload = require('express-fileupload');
 
 const app = express()
 const port = 3003
-var modelledPrice, price, windspeed, consumption, production, netProduction, ratio1 = 0.5, ratio2 = 0.5, buffer, power, isOn;
+var modelledPrice, price, windspeed, consumption, production, netProduction, ratio1 = 0.5, ratio2 = 0.5, power, isOn;
 
 const { MongoClient } = require("mongodb");
 const { syncBuiltinESMExports } = require('module');
@@ -82,7 +82,7 @@ app.get('/getNetProduction', (req, res) => {
 })
 app.get('/getBuffer', (req, res) => {
     getBuffer(req.session.username).then(result => {
-        res.send(buffer + "");
+        res.send(result + "");
     })
 })
 app.get('/getUsers', (req, res) => {
@@ -231,6 +231,15 @@ app.post('/sendToBuffer', (req, res) => {
 
 app.post('/useFromBuffer', (req, res) => {
     ratio2 = req.body.useFromBuffer / 100
+    // console.log("req.session.username "+ req.session.username)
+    // getConsumption(req.session.username).then(consumption =>{
+    //     console.log("consumption " + consumption + typeof consumption)
+    //     console.log("ratio2 " + ratio2 + typeof ratio2)
+    //     console.log("consumption*ratio2 " + consumption*ratio2)
+    //     setMarketDemand(req.session.username, consumption*ratio2)
+    //     res.redirect('/')
+    // })
+    
 })
 
 app.post('/setPrice', (req, res) => {
@@ -276,7 +285,7 @@ async function getWindspeed() {
 
 async function getConsumption(username) {
     if(username != undefined){
-        console.log("Username: " + username)
+        // console.log("Username: " + username)
         request('http://localhost:3000/getUser/' + username, { json: true }, (err, res, body) => {
             if (err) { return console.log(err); }
             consumption = res.body;
@@ -324,7 +333,7 @@ async function getStatus() {
 }
 
 async function getNetProduction(username) {
-    console.log("Username: " + username)
+    // console.log("Username: " + username)
     consumption = await getConsumption(username);
     consumption = parseFloat(consumption)
     console.log("Consumption: " + consumption)
@@ -339,6 +348,7 @@ async function getNetProduction(username) {
 }
 
 async function getBuffer(username) {
+    var buffer;
     getNetProduction().then(netProduction => {
         getBufferForUser(username).then(bufferTemp => {
             if (!isNaN(netProduction) && bufferTemp != undefined) {
@@ -346,26 +356,33 @@ async function getBuffer(username) {
                 if (netProduction >= 0) {
                     var toBuffer = parseFloat(ratio1 * netProduction)
                     var toMarket = netProduction - toBuffer
-                    buffer = (parseFloat(bufferTemp) + toBuffer).toFixed(2)
+                    buffer = parseFloat(bufferTemp) + toBuffer
+                    sendToMarket(toMarket);
+                    setMarketDemand(username, 0)
                 }
                 //In case of excessive production, Prosumer should be 
                 //able to control the ratio of how much should be 
                 //sold to the market and how much should be sent to 
                 //the buffer
                 else {
-                    var fromBuffer = parseFloat(ratio2 * netProduction)
-                    var toMarket = netProduction - fromBuffer
-                    buffer = (parseFloat(bufferTemp) + fromBuffer).toFixed(2)
+                    var fromBuffer = parseFloat(ratio2 * -netProduction)
+                    var fromMarket = -netProduction - fromBuffer
+                    buffer = parseFloat(bufferTemp) + fromBuffer
+                    if(buffer < 0) {
+                        fromMarket = -netProduction - fromBuffer - buffer
+                        buffer = 0
+                    }
+                    setMarketDemand(username, fromMarket)
                 }
-                setBufferForUser(username, buffer)
-                sendToMarket(toMarket);
-                return buffer;
+                setBufferForUser(username, buffer.toFixed(2))
+                return buffer.toFixed(2);
             } else {
                 return 0;
             }
         })
     })
 }
+
 async function sendToMarket(toMarket) {
     request('http://localhost:3006/sellToMarket/' + toMarket, { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
@@ -425,6 +442,18 @@ async function setBufferForUser(_username, buffer) {
     const updateDoc = {
         $set: {
             buffer: buffer
+        },
+    };
+    const result = await users.updateOne(filter, updateDoc, options);
+    return result;
+}
+
+async function setMarketDemand(_username, demand) {
+    const filter = { username: _username };
+    const options = { upsert: true };
+    const updateDoc = {
+        $set: {
+            market: demand
         },
     };
     const result = await users.updateOne(filter, updateDoc, options);
