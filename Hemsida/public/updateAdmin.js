@@ -7,46 +7,8 @@ $(document).ready(function () {
     updateImg()
 });
 
-/*  <% for(var i=0; i<users.length; i++) {%>
-    <tr>
-        <th scrope="row">
-            <%= i %>
-        </th>
-        <td>
-            <%= users[i].username %>
-        </td>
-        <td>
-            <%= users[i].role %>
-        </td>
-        <td>
-            <%= users[i].status %>
-        </td>
-        <td></td>
-        <td></td>
-        <td id=<%=i %>>
-        </td>
-        <td>
-            <form method="POST">
-                <input type="hidden" name="username" value=<%=users[i].username %>>
-                <input type="submit" value="Block">
-            </form>
-        </td>
-        <td>
-            <form method="POST">
-                <input type="hidden" name="username" value=<%=users[i].username %>>
-                <input type="submit" value="Update">
-            </form>
-        </td>
-        <td>
-            <form method="POST">
-                <input type="hidden" name="username" value=<%=users[i].username %>>
-                <input type="submit" value="Delete" formaction="/delete">
-            </form>
-        </td>
-    </tr>
-    <% } %>  */
-
 async function updateBuffer() {
+    var marketDemand = 0;
     $.ajax({
         type: 'GET',
         url: '/getUsers',
@@ -54,6 +16,7 @@ async function updateBuffer() {
             $("#users").empty()
             for (var i = 0; i < users.length; i++) {
                 if (users[i].role == "prosumer") {
+                    marketDemand += parseFloat(users[i].market)
                     var trStart = $("<tr>")
                     // var th = $("<th></th>").text(i)
                     var tdUserName = $("<td></td>").text(users[i].username)
@@ -91,6 +54,7 @@ async function updateBuffer() {
                     $("#users").append(trStart, tdUserName, tdRole, tdStatus, tdConsumption, tdProduction, tdBuffer, tdBlock, tdUpdate, tdDelete, trEnd)
                 }
             }
+            $("#marketDemand").text(marketDemand.toFixed(2))
         }
     }).then(function () {
         setTimeout(updateBuffer, 1000) //call itself every 1000ms
