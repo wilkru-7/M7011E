@@ -18,13 +18,13 @@ var consumption = 0;
 var consumptionDistribution = gaussian(11, 3);
 
 app.get('/', (req, res) => {
-    res.json(getConsumption());
+    res.json("Consumption Service");
 })
 
 app.get('/startUser/:user', (req, res) => {
     var user = req.params['user']
     var newUser = new Consumer(user)
-    console.log("newUser "+  newUser.username)
+    console.log("newUser " + newUser.username)
     setInterval(updateConsumption, 1000, newUser)
     res.json("ok");
 })
@@ -46,15 +46,15 @@ function getConsumption() {
     return consumption;
 }
 
-class Consumer{
-    constructor(username){
+class Consumer {
+    constructor(username) {
         this.username = username
         this.consumption = 0
         this.consuming = true;
     }
 }
 
-function updateConsumption(consumer){
+function updateConsumption(consumer) {
     consumer.consumption = consumptionDistribution.ppf(Math.random()).toFixed(2);
     insertConsumption(consumer.username, consumer.consumption)
 }
@@ -73,7 +73,7 @@ async function insertConsumption(_username, value) {
 async function getUserConsumption(_username) {
     const search = { username: _username };
     var user = await users.findOne(search)
-    if(user.consumption){
-         return user.consumption
+    if (user.consumption) {
+        return user.consumption
     }
 }

@@ -11,6 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.1",
+    "gaussian": "^1.2.0",
+    "mongodb": "^4.2.2",
     "nodemon": "^2.0.15",
     "request": "^2.88.2"
   }

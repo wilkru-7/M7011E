@@ -4,12 +4,13 @@
   "description": "",
   "main": "powerplant.js",
   "scripts": {
-    "start": "node powerplant.js",
+    "start": "nodemon powerplant.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "mongodb": "^4.2.2"
   }
 }

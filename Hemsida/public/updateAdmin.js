@@ -53,20 +53,20 @@ async function updateBuffer() {
         success: (users) => {
             $("#users").empty()
             for (var i = 0; i < users.length; i++) {
-                if(users[i].role == "prosumer") {
+                if (users[i].role == "prosumer") {
                     var trStart = $("<tr>")
                     // var th = $("<th></th>").text(i)
                     var tdUserName = $("<td></td>").text(users[i].username)
                     var tdRole = $("<td></td>").text(users[i].role)
                     var tdStatus = $("<td></td>").text(users[i].status)
                     var tdConsumption = $("<td></td>").text(users[i].consumption)
-                    var tdProduction = $("<td></td>").text("")
+                    var tdProduction = $("<td></td>").text(users[i].production)
                     var tdBuffer = $("<td></td>").text(users[i].buffer)
 
                     /* Block Button */
-                    var tdBlock ='<td>'
-                    var tdBlock1 ='<form method="POST">'
-                    var tdBlock2 = '<input type="hidden" name="username" value="'+ users[i].username + '">'
+                    var tdBlock = '<td>'
+                    var tdBlock1 = '<form method="POST">'
+                    var tdBlock2 = '<input type="hidden" name="username" value="' + users[i].username + '">'
                     var tdBlock3 = '<input class="mx-auto col-6 btn btn-primary active type="submit" value="Block">'
                     var tdBlock4 = '</form></td>'
                     var tdBlock = tdBlock.concat(tdBlock1, tdBlock2, tdBlock3, tdBlock4)

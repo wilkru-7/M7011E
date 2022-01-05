@@ -8,16 +8,14 @@ var fs = require('fs');
 var bcrypt = require('bcrypt');
 const saltRounds = 10;
 
-var bodyParser = require('body-parser');
 var session = require('express-session');
 const fileUpload = require('express-fileupload');
 
 const app = express()
 const port = 3003
-var modelledPrice, price, windspeed, consumption, production, netProduction, ratio1 = 0.5, ratio2 = 0.5, power, isOn;
+var modelledPrice, price, windspeed, consumption, production, netProduction, power, isOn;
 
 const { MongoClient } = require("mongodb");
-const { syncBuiltinESMExports } = require('module');
 
 const uri = "mongodb://localhost:27017/";
 const client = new MongoClient(uri);
@@ -52,33 +50,29 @@ app.set('view engine', 'ejs');
 app.get('/test', (req, res) => {
     res.render("test")
 })
-// app.get('/getData', (req, res) => {
-//     getWindspeed()
-//     res.send(windspeed);
-// })
+
 app.get('/getWindspeed', (req, res) => {
     getWindspeed().then(res.send(windspeed + ""))
-    //res.send(windspeed);
 })
+
 app.get('/getModelledPrice', (req, res) => {
     getModelledPrice().then(res.send(modelledPrice + ""))
-    //res.send(modelledPrice);
 })
-// app.get('/getPrice', (req, res) => {
-//     getPrice()
-//     res.send(price);
-// })
 app.get('/getConsumption', (req, res) => {
     getConsumption(req.session.username).then(res.send(consumption + ""))
-    //res.send(consumption);
 })
+
 app.get('/getProduction', (req, res) => {
-    getProduction().then(res.send(production + ""))
-    //res.send(production);
+    getProduction(req.session.username).then(res.send(production + ""))
 })
+
 app.get('/getNetProduction', (req, res) => {
     getNetProduction(req.session.username).then(res.send(netProduction + ""))
-    //res.send(netProduction + "");
+})
+
+app.get('/getNetProduction/:username', (req, res) => {
+    var username = req.params['username']
+    getNetProduction(username).then(res.send(netProduction + ""))
 })
 app.get('/getBuffer', (req, res) => {
     getBuffer(req.session.username).then(result => {
@@ -92,13 +86,11 @@ app.get('/getUsers', (req, res) => {
 })
 app.get('/getPowerplant', (req, res) => {
     getPower().then(res.send(power + ""));
-    //res.send(power + "")
 })
 app.get('/getPrice', (req, res) => {
     getPrice().then(result => {
         res.send(result + "")
     });
-    //res.send(price + "")
 })
 app.get('/', (req, res) => {
     if (req.session.loggedin) {
@@ -112,11 +104,11 @@ app.get('/', (req, res) => {
         res.redirect("login")
     }
 })
+
 app.get('/getStatus', (req, res) => {
     getStatus().then(result => {
         res.send(result + "")
     });
-    //res.send(isOn + "")
 })
 
 app.post('/login', (req, res) => {
@@ -142,23 +134,29 @@ app.post('/login', (req, res) => {
         });
     })
 })
+
 app.post('/redirectregister', (req, res) => {
     res.redirect('/register')
 })
+
 app.post('/redirectlogin', (req, res) => {
     res.redirect('/login')
 })
+
 app.get('/logout', (req, res) => {
     req.session.loggedin = false
     logoutDB(req.session.username)
     res.redirect('/login')
 })
+
 app.get('/login', (req, res) => {
     res.render('login', {})
 })
+
 app.get('/register', (req, res) => {
     res.render('register', {})
 })
+
 app.get('/admin', (req, res) => {
     if (req.session.role == "manager") {
         res.render('admin')
@@ -166,13 +164,14 @@ app.get('/admin', (req, res) => {
         res.redirect('/')
     }
 })
+
 app.post('/delete', (req, res) => {
     var username = req.body.username;
     deleteUser(username).then(() => {
-        //return res.send({ status: "success", path: path });
         res.redirect('/admin')
     })
 })
+
 app.post('/register', (req, res) => {
     var username = req.body.registerUsername;
     var password = req.body.registerPassword;
@@ -184,6 +183,12 @@ app.post('/register', (req, res) => {
                 // Now we can store the password hash in db.
                 insert(username, hash)
                 request('http://localhost:3000/startUser/' + username, { json: true }, (err, res, body) => {
+                    if (err) { return console.log(err); }
+                });
+                request('http://localhost:3004/startUser/' + username, { json: true }, (err, res, body) => {
+                    if (err) { return console.log(err); }
+                });
+                request('http://localhost:3005/startUser/' + username, { json: true }, (err, res, body) => {
                     if (err) { return console.log(err); }
                 });
                 res.redirect('/login')
@@ -203,43 +208,32 @@ app.post('/imageupload', (req, res) => {
     const file = req.files.filename;
 
     insertImg(req.session.username, file).then(() => {
-        //return res.send({ status: "success", path: path });
         res.redirect('/')
     })
 })
+
 app.get('/getImg', (req, res) => {
     console.log("1")
     getImg(req.session.username).then(imgPath => {
         console.log("imgPath: " + imgPath)
         res.send(imgPath)
-        /*         const path = __dirname + "/files/" + img.name;
-                img.mv(path, (err) => {
-                    console.log("3")
-                    if (err) {
-                        return res.status(500).send(err);
-                    }
-                }); */
-        /*         return img */
     })
-
-
 })
 
 app.post('/sendToBuffer', (req, res) => {
-    ratio1 = req.body.sendToBuffer / 100
+    let ratio1 = req.body.sendToBuffer / 100
+    request('http://localhost:3005/setRatio/1/' + req.session.username + "/" + ratio1, { json: true }, (err, res, body) => {
+        if (err) { return console.log(err); }
+    });
+
 })
 
 app.post('/useFromBuffer', (req, res) => {
-    ratio2 = req.body.useFromBuffer / 100
-    // console.log("req.session.username "+ req.session.username)
-    // getConsumption(req.session.username).then(consumption =>{
-    //     console.log("consumption " + consumption + typeof consumption)
-    //     console.log("ratio2 " + ratio2 + typeof ratio2)
-    //     console.log("consumption*ratio2 " + consumption*ratio2)
-    //     setMarketDemand(req.session.username, consumption*ratio2)
-    //     res.redirect('/')
-    // })
-    
+    let ratio2 = req.body.useFromBuffer / 100
+    request('http://localhost:3005/setRatio/2/' + req.session.username + "/" + ratio2, { json: true }, (err, res, body) => {
+        if (err) { return console.log(err); }
+    });
+
 })
 
 app.post('/setPrice', (req, res) => {
@@ -271,7 +265,7 @@ app.listen(port, () => {
 })
 
 async function insert(_username, _password) {
-    const insert = { username: _username, password: _password, buffer: 0, role: "prosumer" };
+    const insert = { username: _username, password: _password, buffer: 0, ratio1: 0.5, ratio2: 0.5, role: "prosumer" };
     const result = await users.insertOne(insert);
 }
 
@@ -284,8 +278,7 @@ async function getWindspeed() {
 }
 
 async function getConsumption(username) {
-    if(username != undefined){
-        // console.log("Username: " + username)
+    if (username != undefined) {
         request('http://localhost:3000/getUser/' + username, { json: true }, (err, res, body) => {
             if (err) { return console.log(err); }
             consumption = res.body;
@@ -293,13 +286,26 @@ async function getConsumption(username) {
         return consumption;
     }
 }
-async function getProduction() {
-    request('http://localhost:3004/', { json: true }, (err, res, body) => {
+async function getBuffer(username) {
+    if (username != undefined) {
+        const buffer = await new Promise(function (resolve, reject) {
+            request('http://localhost:3005/getBuffer/' + username, { json: true }, (err, res, body) => {
+                if (err) { return console.log(err); }
+                resolve(res.body)
+            })
+        });
+
+        return buffer;
+    }
+}
+async function getProduction(username) {
+    request('http://localhost:3004/getUser/' + username, { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         production = res.body;
     });
     return production;
 }
+
 async function getModelledPrice() {
     request('http://localhost:3002/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
@@ -307,6 +313,7 @@ async function getModelledPrice() {
     })
     return modelledPrice;
 }
+
 async function getPrice() {
     request('http://localhost:3007/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
@@ -314,6 +321,7 @@ async function getPrice() {
     })
     return price;
 }
+
 async function getPower() {
     request('http://localhost:3006/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
@@ -326,67 +334,21 @@ async function getStatus() {
     request('http://localhost:3006/status', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         isOn = res.body;
-        
+
         console.log("isOn: " + isOn)
     })
     return isOn;
 }
 
 async function getNetProduction(username) {
-    // console.log("Username: " + username)
     consumption = await getConsumption(username);
     consumption = parseFloat(consumption)
-    console.log("Consumption: " + consumption)
-    production = await getProduction();
+    production = await getProduction(username);
     production = parseFloat(production)
-    console.log("production:" + production)
-    if(!isNaN(production - consumption)) {
+    if (!isNaN(production - consumption)) {
         netProduction = (production - consumption).toFixed(2);
-        console.log("netProduction:" + netProduction)
     }
     return netProduction;
-}
-
-async function getBuffer(username) {
-    var buffer;
-    getNetProduction().then(netProduction => {
-        getBufferForUser(username).then(bufferTemp => {
-            if (!isNaN(netProduction) && bufferTemp != undefined) {
-                //Over-Production
-                if (netProduction >= 0) {
-                    var toBuffer = parseFloat(ratio1 * netProduction)
-                    var toMarket = netProduction - toBuffer
-                    buffer = parseFloat(bufferTemp) + toBuffer
-                    sendToMarket(toMarket);
-                    setMarketDemand(username, 0)
-                }
-                //In case of excessive production, Prosumer should be 
-                //able to control the ratio of how much should be 
-                //sold to the market and how much should be sent to 
-                //the buffer
-                else {
-                    var fromBuffer = parseFloat(ratio2 * -netProduction)
-                    var fromMarket = -netProduction - fromBuffer
-                    buffer = parseFloat(bufferTemp) + fromBuffer
-                    if(buffer < 0) {
-                        fromMarket = -netProduction - fromBuffer - buffer
-                        buffer = 0
-                    }
-                    setMarketDemand(username, fromMarket)
-                }
-                setBufferForUser(username, buffer.toFixed(2))
-                return buffer.toFixed(2);
-            } else {
-                return 0;
-            }
-        })
-    })
-}
-
-async function sendToMarket(toMarket) {
-    request('http://localhost:3006/sellToMarket/' + toMarket, { json: true }, (err, res, body) => {
-        if (err) { return console.log(err); }
-    })
 }
 
 async function login(_username) {
@@ -426,37 +388,9 @@ async function logoutDB(_username) {
     const result = await users.updateOne(filter, updateDoc, options);
     return result;
 }
+
 async function findUsers() {
     result = await users.find().toArray();
-    return result;
-}
-async function getBufferForUser(_username) {
-    const search = { username: _username };
-    var user = await users.findOne(search)
-    console.log("user.buffer: " + user.buffer)
-    return user.buffer;
-}
-async function setBufferForUser(_username, buffer) {
-    const filter = { username: _username };
-    const options = { upsert: true };
-    const updateDoc = {
-        $set: {
-            buffer: buffer
-        },
-    };
-    const result = await users.updateOne(filter, updateDoc, options);
-    return result;
-}
-
-async function setMarketDemand(_username, demand) {
-    const filter = { username: _username };
-    const options = { upsert: true };
-    const updateDoc = {
-        $set: {
-            market: demand
-        },
-    };
-    const result = await users.updateOne(filter, updateDoc, options);
     return result;
 }
 
