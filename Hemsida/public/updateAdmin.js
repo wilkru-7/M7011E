@@ -1,4 +1,5 @@
 $(document).ready(function () {
+    updateUsers()
     updateBuffer()
     updateModelledPrice()
     updatePrice()
@@ -7,7 +8,7 @@ $(document).ready(function () {
     updateImg()
 });
 
-async function updateBuffer() {
+async function updateUsers() {
     var marketDemand = 0;
     $.ajax({
         type: 'GET',
@@ -55,6 +56,18 @@ async function updateBuffer() {
                 }
             }
             $("#marketDemand").text(marketDemand.toFixed(2))
+        }
+    }).then(function () {
+        setTimeout(updateBuffer, 1000) //call itself every 1000ms
+    });
+}
+
+async function updateBuffer() {
+    $.ajax({
+        type: 'GET',
+        url: '/getBufferManager',
+        success: (buffer) => {
+            $("#buffer").text(buffer)
         }
     }).then(function () {
         setTimeout(updateBuffer, 1000) //call itself every 1000ms

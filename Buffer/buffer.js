@@ -147,47 +147,60 @@ async function getBuffer(_username) {
         return user.buffer;
     }
 }
+
 async function updateBuffer(username) {
-    if (await isUserDeleted(username) == true) {
-        console.log("Deleting: " + username)
-        clearInterval(intervals.get(username))
-        await deleteUser(username)
-        return
-    }
-    var buffer;
-    var netProduction = await getNetProduction(username)
-    if (netProduction) {
+    if (await getUserRole(username) == "manager") {
+        var buffer;
         var bufferTemp = await getBuffer(username)
-        if (!isNaN(netProduction) && bufferTemp != undefined) {
-            //Over-Production
-            if (netProduction >= 0) {
-                var ratio1 = parseFloat(await getRatio(1, username))
-                var toBuffer = parseFloat(ratio1 * netProduction)
-                var toMarket = parseFloat(netProduction - toBuffer)
-                buffer = parseFloat(bufferTemp) + toBuffer
-                sendToMarket(toMarket);
-                setMarketDemand(username, 0)
-            }
-            //In case of excessive production, Prosumer should be 
-            //able to control the ratio of how much should be 
-            //sold to the market and how much should be sent to 
-            //the buffer
-            else {
-                var ratio2 = parseFloat(await getRatio(2, username))
-                var fromBuffer = parseFloat(ratio2 * netProduction)
-                var fromMarket = -parseFloat(netProduction - fromBuffer)
-                buffer = parseFloat(bufferTemp) + fromBuffer
-                if (buffer < 0) {
-                    fromMarket = -parseFloat(netProduction - fromBuffer - buffer)
-                    buffer = 0
+        var production = await getPowerPlantProduction()
+        var ratio = await getRatio(1, username)
+        var toBuffer = parseFloat(ratio) * parseFloat(production)
+        var toMarket = parseFloat(production) - toBuffer
+        buffer = parseFloat(bufferTemp) + toBuffer
+        addToBuffer(username, buffer.toFixed(2))
+        sellToMarket(toMarket)
+        return buffer.toFixed(2);
+    } else {
+        if (await isUserDeleted(username) == true) {
+            clearInterval(intervals.get(username))
+            await deleteUser(username)
+            return
+        }
+        var buffer;
+        var netProduction = await getNetProduction(username)
+        if (netProduction) {
+            var bufferTemp = await getBuffer(username)
+            if (!isNaN(netProduction) && bufferTemp != undefined) {
+                //Over-Production
+                if (netProduction >= 0) {
+                    var ratio1 = parseFloat(await getRatio(1, username))
+                    var toBuffer = parseFloat(ratio1 * netProduction)
+                    var toMarket = parseFloat(netProduction - toBuffer)
+                    buffer = parseFloat(bufferTemp) + toBuffer
+                    sendToMarket(toMarket);
+                    setMarketDemand(username, 0)
                 }
-                buyFromMarket(fromMarket)
-                setMarketDemand(username, fromMarket)
+                //In case of excessive production, Prosumer should be 
+                //able to control the ratio of how much should be 
+                //sold to the market and how much should be sent to 
+                //the buffer
+                else {
+                    var ratio2 = parseFloat(await getRatio(2, username))
+                    var fromBuffer = parseFloat(ratio2 * netProduction)
+                    var fromMarket = -parseFloat(netProduction - fromBuffer)
+                    buffer = parseFloat(bufferTemp) + fromBuffer
+                    if (buffer < 0) {
+                        fromMarket = -parseFloat(netProduction - fromBuffer - buffer)
+                        buffer = 0
+                    }
+                    buyFromMarket(fromMarket)
+                    setMarketDemand(username, fromMarket)
+                }
+                addToBuffer(username, buffer.toFixed(2))
+                return buffer.toFixed(2);
+            } else {
+                return 0;
             }
-            addToBuffer(username, buffer.toFixed(2))
-            return buffer.toFixed(2);
-        } else {
-            return 0;
         }
     }
 }
@@ -196,6 +209,7 @@ async function deleteUser(_username) {
     const search = { username: _username };
     await users.deleteOne(search);
 }
+
 async function getNetProduction(username) {
     const netProduction = await new Promise(function (resolve, reject) {
         request('http://localhost:3003/getNetProduction/' + username, { json: true }, (err, res, body) => {
@@ -203,9 +217,17 @@ async function getNetProduction(username) {
             resolve(res.body)
         })
     });
-
     return netProduction;
+}
 
+async function sellToMarket(amount) {
+    const market = await new Promise(function (resolve, reject) {
+        request('http://localhost:3006/sellToMarket/' + amount, { json: true }, (err, res, body) => {
+            if (err) { return console.log(err); }
+            resolve(res.body)
+        })
+    });
+    return market;
 }
 
 async function getConsumption(username) {
@@ -229,6 +251,17 @@ async function getProduction(username) {
     return production;
 }
 
+async function getPowerPlantProduction() {
+    const production = await new Promise(function (resolve, reject) {
+        request('http://localhost:3006/', { json: true }, (err, res, body) => {
+            if (err) { return console.log(err); }
+            resolve(res.body)
+        })
+    });
+    return production;
+}
+
+
 async function isUserDeleted(_username) {
     const search = { username: _username };
     const options = { $exists: false }
@@ -242,6 +275,14 @@ async function isUserDeleted(_username) {
     if (result) {
         return true
     } return false
+}
+
+async function getUserRole(_username) {
+    const search = { username: _username };
+    var user = await users.findOne(search)
+    if (user) {
+        return user.role
+    }
 }
 
 async function setMarketDemand(_username, demand) {

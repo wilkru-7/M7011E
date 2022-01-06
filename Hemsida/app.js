@@ -79,6 +79,11 @@ app.get('/getBuffer', (req, res) => {
         res.send(result + "");
     })
 })
+app.get('/getBufferManager', (req, res) => {
+    getBufferManager().then(result => {
+        res.send(result + "");
+    })
+})
 app.get('/getUsers', (req, res) => {
     findUsers().then(result => {
         res.send(result)
@@ -226,7 +231,6 @@ app.post('/sendToBuffer', (req, res) => {
     request('http://localhost:3005/setRatio/1/' + req.session.username + "/" + ratio1, { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
     });
-
 })
 
 app.post('/useFromBuffer', (req, res) => {
@@ -234,7 +238,6 @@ app.post('/useFromBuffer', (req, res) => {
     request('http://localhost:3005/setRatio/2/' + req.session.username + "/" + ratio2, { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
     });
-
 })
 
 app.post('/setPrice', (req, res) => {
@@ -287,6 +290,7 @@ async function getConsumption(username) {
         return consumption;
     }
 }
+
 async function getBuffer(username) {
     if (username != undefined) {
         const buffer = await new Promise(function (resolve, reject) {
@@ -295,10 +299,10 @@ async function getBuffer(username) {
                 resolve(res.body)
             })
         });
-
         return buffer;
     }
 }
+
 async function getProduction(username) {
     request('http://localhost:3004/getUser/' + username, { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
@@ -427,4 +431,14 @@ async function getImg(_username) {
         })
         return path2;
     }
+}
+
+async function getBufferManager() {
+    const market = await new Promise(function (resolve, reject) {
+        request('http://localhost:3006/getBuffer/', { json: true }, (err, res, body) => {
+            if (err) { return console.log(err); }
+            resolve(res.body)
+        })
+    });
+    return market.toFixed(2);
 }
