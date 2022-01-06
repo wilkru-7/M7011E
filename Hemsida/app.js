@@ -97,6 +97,7 @@ app.get('/getPrice', (req, res) => {
         res.send(result + "")
     });
 })
+
 app.get('/', (req, res) => {
     if (req.session.loggedin) {
         console.log(req.session.loggedin)
@@ -115,7 +116,24 @@ app.get('/getStatus', (req, res) => {
         res.send(result + "")
     });
 })
+app.post('/checkUpdateCredentials', (req, res) => {
+    var username = req.body.registerUsername;
+    var password = req.body.registerPassword;
+    var password2 = req.body.registerPassword2;
 
+    search(username).then(exists => {
+        if (exists && password == password2) {
+            bcrypt.hash(password, saltRounds, (err, hash) => {
+                // Now we can store the password hash in db.
+                updatePassword(username, hash)
+                res.redirect('/login')
+            });
+        } else {
+            console.log("Something was entered wrong")
+            res.redirect('/updateCredentials')
+        }
+    })
+})
 app.post('/login', (req, res) => {
     /* TODO:
         Check input so no hacking */
@@ -162,6 +180,11 @@ app.get('/register', (req, res) => {
     res.render('register', {})
 })
 
+app.post('/updateCredentials', (req, res) => {
+    var username = req.body.username;
+    res.render('updateCredentials', { user: username })
+})
+
 app.get('/admin', (req, res) => {
     if (req.session.role == "manager") {
         res.render('admin')
@@ -176,6 +199,14 @@ app.post('/delete', (req, res) => {
     deleteUser(username).then(() => {
         res.redirect('/admin')
     })
+})
+
+app.post('/block', (req, res) => {
+    var username = req.body.username;
+    blockUser(username, true).then(() => {
+        res.redirect('/admin')
+    })
+    setTimeout(function () { blockUser(username, false) }, 10000);
 })
 
 app.post('/register', (req, res) => {
@@ -269,7 +300,7 @@ app.listen(port, () => {
 })
 
 async function insert(_username, _password) {
-    const insert = { username: _username, password: _password, buffer: 0, ratio1: 0.5, ratio2: 0.5, role: "prosumer" };
+    const insert = { username: _username, password: _password, buffer: 0, ratio1: 0.5, ratio2: 0.5, blocked: false, role: "prosumer" };
     const result = await users.insertOne(insert);
 }
 
@@ -441,4 +472,30 @@ async function getBufferManager() {
         })
     });
     return market.toFixed(2);
+}
+
+async function blockUser(_username, _blocked) {
+    console.log("blockUser: " + _blocked)
+    const filter = { username: _username };
+    const options = { upsert: true };
+    const updateDoc = {
+        $set: {
+            blocked: _blocked
+        },
+    };
+    const result = await users.updateOne(filter, updateDoc, options);
+    return result;
+}
+
+async function updatePassword(_username, _password) {
+    console.log("blockUser: " + _password)
+    const filter = { username: _username };
+    const options = { upsert: true };
+    const updateDoc = {
+        $set: {
+            password: _password
+        },
+    };
+    const result = await users.updateOne(filter, updateDoc, options);
+    return result;
 }

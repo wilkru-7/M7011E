@@ -177,7 +177,11 @@ async function updateBuffer(username) {
                     var toBuffer = parseFloat(ratio1 * netProduction)
                     var toMarket = parseFloat(netProduction - toBuffer)
                     buffer = parseFloat(bufferTemp) + toBuffer
-                    sendToMarket(toMarket);
+                    if (! await userIsBlocked(username)) {
+                        sendToMarket(toMarket);
+                    } else {
+                        buffer = netProduction
+                    }
                     setMarketDemand(username, 0)
                 }
                 //In case of excessive production, Prosumer should be 
@@ -285,6 +289,14 @@ async function getUserRole(_username) {
     }
 }
 
+async function userIsBlocked(_username) {
+    const search = { username: _username };
+    var user = await users.findOne(search)
+    if (user) {
+        return user.blocked
+    }
+}
+
 async function setMarketDemand(_username, demand) {
     const filter = { username: _username };
     const options = { upsert: true };
@@ -296,6 +308,7 @@ async function setMarketDemand(_username, demand) {
     const result = await users.updateOne(filter, updateDoc, options);
     return result;
 }
+
 
 class Buffer {
     constructor(username) {
