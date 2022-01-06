@@ -12,13 +12,15 @@ const users = database.collection('Users');
 const app = express()
 const port = 3004
 
+var intervals = new Map()
 
 var productionDistribution = gaussian(2, 1);
 
 app.get('/startUser/:user', (req, res) => {
     var username = req.params['user']
     var newUser = new Producer(username)
-    setInterval(updateProduction, 1000, newUser)
+    var interval = setInterval(updateProduction, 1000, newUser)
+    intervals.set(newUser.username, interval)
     res.json("ok");
 })
 
@@ -46,7 +48,13 @@ class Producer {
     }
 }
 
-function updateProduction(producer) {
+async function updateProduction(producer) {
+    if (await isUserDeleted(producer.username) == true) {
+        console.log("Deleting: " + producer.username)
+        clearInterval(intervals.get(producer.username))
+        deleteUser(producer.username)
+        return
+    }
     var windSpeed;
     request('http://localhost:3001/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
@@ -79,4 +87,24 @@ async function getUserProduction(_username) {
         console.log("user.production: " + user.production)
         return user.production
     }
+}
+
+async function isUserDeleted(_username) {
+    const search = { username: _username };
+    const options = { $exists: false }
+    /* const result = await users.findOne(search, options); */
+    const result = await users.findOne({
+        $and: [
+            { 'role': { $exists: false } },
+            { 'username': _username }
+        ]
+    })
+    if (result) {
+        return true
+    } return false
+}
+
+async function deleteUser(_username) {
+    const search = { username: _username };
+    await users.deleteOne(search);
 }

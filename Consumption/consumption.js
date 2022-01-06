@@ -14,6 +14,8 @@ const users = database.collection('Users');
 const app = express()
 const port = 3000
 
+var intervals = new Map()
+
 var consumption = 0;
 var consumptionDistribution = gaussian(11, 3);
 
@@ -25,7 +27,8 @@ app.get('/startUser/:user', (req, res) => {
     var user = req.params['user']
     var newUser = new Consumer(user)
     console.log("newUser " + newUser.username)
-    setInterval(updateConsumption, 1000, newUser)
+    var interval = setInterval(updateConsumption, 1000, newUser)
+    intervals.set(newUser.username, interval)
     res.json("ok");
 })
 
@@ -54,7 +57,13 @@ class Consumer {
     }
 }
 
-function updateConsumption(consumer) {
+async function updateConsumption(consumer) {
+    if (await isUserDeleted(consumer.username) == true) {
+        console.log("Deleting: " + consumer.username)
+        clearInterval(intervals.get(consumer.username))
+        deleteUser(consumer.username)
+        return
+    }
     consumer.consumption = consumptionDistribution.ppf(Math.random()).toFixed(2);
     insertConsumption(consumer.username, consumer.consumption)
 }
@@ -73,7 +82,27 @@ async function insertConsumption(_username, value) {
 async function getUserConsumption(_username) {
     const search = { username: _username };
     var user = await users.findOne(search)
-    if (user.consumption) {
+    if (user) {
         return user.consumption
     }
+}
+
+async function isUserDeleted(_username) {
+    const search = { username: _username };
+    const options = { $exists: false }
+    /* const result = await users.findOne(search, options); */
+    const result = await users.findOne({
+        $and: [
+            { 'role': { $exists: false } },
+            { 'username': _username }
+        ]
+    })
+    if (result) {
+        return true
+    } return false
+}
+
+async function deleteUser(_username) {
+    const search = { username: _username };
+    await users.deleteOne(search);
 }

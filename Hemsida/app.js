@@ -167,6 +167,7 @@ app.get('/admin', (req, res) => {
 
 app.post('/delete', (req, res) => {
     var username = req.body.username;
+    console.log("Deleting: " + username)
     deleteUser(username).then(() => {
         res.redirect('/admin')
     })
@@ -395,8 +396,8 @@ async function findUsers() {
 }
 
 async function deleteUser(_username) {
-    const search = { username: _username };
-    await users.deleteOne(search);
+    const filter = { username: _username };
+    await users.deleteOne(filter);
 }
 
 async function insertImg(_username, file) {

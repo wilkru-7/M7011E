@@ -12,6 +12,8 @@ const users = database.collection('Users');
 const app = express()
 const port = 3005
 
+var intervals = new Map()
+
 app.get('/', (req, res) => {
     res.json(getBuffer());
 })
@@ -19,8 +21,11 @@ app.get('/startUser/:username', (req, res) => {
     username = req.params['username']
     var newUser = new Buffer(username)
     console.log("newUser " + newUser.username)
-    setInterval(updateBuffer, 1000, newUser.username)
-    res.json("New User Started: " + newUser.username);
+    var interval = setInterval(updateBuffer, 1000, newUser.username)
+    intervals.set(newUser.username, interval)
+
+    res.json("interval:" + interval)
+    //res.json("New User Started: " + newUser.username);
 })
 
 app.get('/addToBuffer/:username/:amount', (req, res) => {
@@ -143,6 +148,12 @@ async function getBuffer(_username) {
     }
 }
 async function updateBuffer(username) {
+    if (await isUserDeleted(username) == true) {
+        console.log("Deleting: " + username)
+        clearInterval(intervals.get(username))
+        await deleteUser(username)
+        return
+    }
     var buffer;
     var netProduction = await getNetProduction(username)
     if (netProduction) {
@@ -181,6 +192,10 @@ async function updateBuffer(username) {
     }
 }
 
+async function deleteUser(_username) {
+    const search = { username: _username };
+    await users.deleteOne(search);
+}
 async function getNetProduction(username) {
     const netProduction = await new Promise(function (resolve, reject) {
         request('http://localhost:3003/getNetProduction/' + username, { json: true }, (err, res, body) => {
@@ -214,6 +229,21 @@ async function getProduction(username) {
     return production;
 }
 
+async function isUserDeleted(_username) {
+    const search = { username: _username };
+    const options = { $exists: false }
+    /* const result = await users.findOne(search, options); */
+    const result = await users.findOne({
+        $and: [
+            { 'role': { $exists: false } },
+            { 'username': _username }
+        ]
+    })
+    if (result) {
+        return true
+    } return false
+}
+
 async function setMarketDemand(_username, demand) {
     const filter = { username: _username };
     const options = { upsert: true };
@@ -230,5 +260,6 @@ class Buffer {
     constructor(username) {
         this.username = username;
         this.buffer = 0;
+        this.active = true;
     }
 }
