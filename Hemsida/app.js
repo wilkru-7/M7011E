@@ -117,20 +117,35 @@ app.get('/getStatus', (req, res) => {
     });
 })
 app.post('/checkUpdateCredentials', (req, res) => {
+    var oldUsername = req.body.username;
+    console.log("oldUsername " + oldUsername)
     var username = req.body.registerUsername;
     var password = req.body.registerPassword;
     var password2 = req.body.registerPassword2;
 
-    search(username).then(exists => {
-        if (exists && password == password2) {
+    search(username).then(dontExists => {
+        if(dontExists && username != "" && password == "" && password2 == "") {
+            updateUsername(oldUsername, username).then(result => {
+                res.redirect('/admin')
+            })
+        } else if (username == "" && password == password2 && password != "") {
             bcrypt.hash(password, saltRounds, (err, hash) => {
                 // Now we can store the password hash in db.
-                updatePassword(username, hash)
-                res.redirect('/login')
+                updatePassword(oldUsername, hash)
+                res.redirect('/admin')
+            });
+        } else if (dontExists && username != "" && password == password2 && password != "") {
+            bcrypt.hash(password, saltRounds, (err, hash) => {
+                // Now we can store the password hash in db.
+                updatePassword(oldUsername, hash).then(result => {
+                    updateUsername(oldUsername, username).then(result => {
+                        res.redirect('/admin')
+                    })
+                }) 
             });
         } else {
             console.log("Something was entered wrong")
-            res.redirect('/updateCredentials')
+            res.render('updateCredentials', {user: oldUsername})
         }
     })
 })
@@ -494,6 +509,18 @@ async function updatePassword(_username, _password) {
     const updateDoc = {
         $set: {
             password: _password
+        },
+    };
+    const result = await users.updateOne(filter, updateDoc, options);
+    return result;
+}
+
+async function updateUsername(oldUsername, newUsername) {
+    const filter = { username: oldUsername};
+    const options = { upsert: true };
+    const updateDoc = {
+        $set: {
+            username: newUsername
         },
     };
     const result = await users.updateOne(filter, updateDoc, options);
