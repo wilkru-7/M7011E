@@ -23,7 +23,7 @@ async function setStatus(_status) {
                 status: status
             },
         };
-    const result = await market.updateOne(filter, updateDoc, options);
+        const result = await market.updateOne(filter, updateDoc, options);
         await new Promise(resolve => setTimeout(resolve, 5000));
         status = "Running"
     } else {
@@ -60,7 +60,7 @@ async function updatePower() {
         power = 40000;
         var ratio = await getRatio()
         updateBuffer(power * parseFloat(ratio))
-    } 
+    }
     setTimeout(updatePower, 1000)
 }
 
@@ -116,15 +116,26 @@ app.get('/buyFromMarket/:amount', (req, res) => {
     if (amount > 0) {
         getMarket().then(result => {
             if (amount > result) {
-                removeFromMarket(result)
-                rermoveFromBuffer(result)
+                getStatus().then(status => {
+                    if (status) {
+                        removeFromMarket(result)
+                    } else {
+                        removeFromBuffer(result)
+                    }
+                })
+                res.send("empty")
             }
             else {
-                removeFromMarket(amount)
-                removeFromBuffer(amount)
+                getStatus().then(status => {
+                    if (status) {
+                        removeFromMarket(amount)
+                    } else {
+                        removeFromBuffer(amount)
+                    }
+                })
+                res.send("0")
             }
         })
-        res.send("ok")
     }
     else {
         res.send("not ok")
@@ -154,18 +165,17 @@ async function addToMarket(demand) {
 }
 
 async function removeFromMarket(demand) {
-    if(await getStatus()){
-        const filter = {};
-        const options = { upsert: true };
-        const updateDoc = {
-            $inc: {
-                Market: -demand
-            },
-        };
-        const result = await market.updateOne(filter, updateDoc, options);
-        return result;
-    }
+    const filter = {};
+    const options = { upsert: true };
+    const updateDoc = {
+        $inc: {
+            Market: -demand
+        },
+    };
+    const result = await market.updateOne(filter, updateDoc, options);
+    return result;
 }
+
 
 async function removeFromBuffer(amount) {
     const filter = {};

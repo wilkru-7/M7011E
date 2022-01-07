@@ -86,9 +86,12 @@ async function sendToMarket(amount) {
     })
 }
 async function buyFromMarket(amount) {
+    var result
     request('http://localhost:3006/buyFromMarket/' + amount, { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
+        result = res.body
     })
+    return result
 }
 /* async function setBufferForUser(username, amount) {
     request('http://localhost:3005/addToBuffer/' + username + "/" + amount, { json: true }, (err, res, body) => {
@@ -197,7 +200,14 @@ async function updateBuffer(username) {
                         fromMarket = -parseFloat(netProduction - fromBuffer - buffer)
                         buffer = 0
                     }
-                    buyFromMarket(fromMarket)
+                    var result = buyFromMarket(fromMarket)
+                    if (result == "empty") {
+
+                        setUserBlackOut(username, true)
+                    }
+                    else {
+                        setUserBlackOut(username, false)
+                    }
                     setMarketDemand(username, fromMarket)
                 }
                 addToBuffer(username, buffer.toFixed(2))
@@ -309,6 +319,17 @@ async function setMarketDemand(_username, demand) {
     return result;
 }
 
+async function setUserBlackOut(_username, check) {
+    const filter = { username: _username };
+    const options = { upsert: true };
+    const updateDoc = {
+        $set: {
+            blackedOut: check
+        },
+    };
+    const result = await users.updateOne(filter, updateDoc, options);
+    return result;
+}
 
 class Buffer {
     constructor(username) {
