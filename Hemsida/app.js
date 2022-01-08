@@ -13,7 +13,7 @@ const fileUpload = require('express-fileupload');
 
 const app = express()
 const port = 3003
-var modelledPrice, price, windspeed, consumption, production, netProduction, power, isOn;
+var price, windspeed, consumption, production, netProduction, power, isOn;
 
 const { MongoClient } = require("mongodb");
 
@@ -56,8 +56,11 @@ app.get('/getWindspeed', (req, res) => {
 })
 
 app.get('/getModelledPrice', (req, res) => {
-    getModelledPrice().then(res.send(modelledPrice + ""))
+    getModelledPrice().then(result => {
+        res.send(result + "");
+    })
 })
+
 app.get('/getConsumption', (req, res) => {
     getConsumption(req.session.username).then(res.send(consumption + ""))
 })
@@ -74,24 +77,29 @@ app.get('/getNetProduction/:username', (req, res) => {
     var username = req.params['username']
     getNetProduction(username).then(res.send(netProduction + ""))
 })
+
 app.get('/getBuffer', (req, res) => {
     getBuffer(req.session.username).then(result => {
         res.send(result + "");
     })
 })
+
 app.get('/getBufferManager', (req, res) => {
     getBufferManager().then(result => {
         res.send(result + "");
     })
 })
+
 app.get('/getUsers', (req, res) => {
     findUsers().then(result => {
         res.send(result)
     })
 })
+
 app.get('/getPowerplant', (req, res) => {
     getPower().then(res.send(power + ""));
 })
+
 app.get('/getPrice', (req, res) => {
     getPrice().then(result => {
         res.send(result + "")
@@ -116,6 +124,7 @@ app.get('/getStatus', (req, res) => {
         res.send(result + "")
     });
 })
+
 app.post('/checkUpdateCredentials', (req, res) => {
     var oldUsername = req.body.username;
     console.log("oldUsername " + oldUsername)
@@ -358,10 +367,12 @@ async function getProduction(username) {
 }
 
 async function getModelledPrice() {
-    request('http://localhost:3002/', { json: true }, (err, res, body) => {
-        if (err) { return console.log(err); }
-        modelledPrice = res.body;
-    })
+    const modelledPrice = await new Promise(function (resolve, reject) {
+        request('http://localhost:3002/', { json: true }, (err, res, body) => {
+            if (err) { return console.log(err); }
+            resolve(res.body)
+        })
+    });
     return modelledPrice;
 }
 

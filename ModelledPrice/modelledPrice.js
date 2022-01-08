@@ -1,46 +1,42 @@
-//const fetch = require('node-fetch');
-//const fetch = require("node-fetch");
-//import fetch from "node-fetch";
-//import fetch from 'node-fetch';
-//var $ = require("jquery");
 const request = require('request');
+const { MongoClient } = require("mongodb");
+const uri = "mongodb://localhost:27017/";
+const client = new MongoClient(uri);
+client.connect();
+const database = client.db('M7011E');
+const market = database.collection('Market');
 var express = require('express');
 const app = express()
 const port = 3002
-var windSpeed;
-var consumption;
-var price;
+
 app.get('/', (req, res) => {
-
-    request('http://localhost:3001/', { json: true }, (err, res, body) => {
-        if (err) { return console.log(err); }
-        windSpeed = parseFloat(res.body);
-        console.log(res.body);
-    });
-    /* request('http://localhost:3001/', { json: true }, (err, res, body) => {
-        if (err) { return console.log(err); }
-        windSpeed = res.body;
-        console.log(res.body);
-    }); */
-    request('http://localhost:3000/', { json: true }, (err, res, body) => {
-        if (err) { return console.log(err); }
-        consumption = parseFloat(res.body);
-        console.log(res.body);
-    });
-    /* request('http://localhost:3000/', { json: true }, (err, res, body) => {
-        if (err) { return console.log(err); }
-        consumption = res.body;
-        console.log(res.body);
-    }); */
-    price = consumption - windSpeed;
-    if (price < 0) {
-        price = 0
-    }
-
-    res.json(price.toFixed(2));
-    // res.send("Windspeed is: " + windSpeed + " Consumption is: " + consumption + " And price is: " + price);
+    getWindSpeed().then(windSpeed => {
+        getMarket().then(marketDemand => {
+            var price = 2 * parseFloat(marketDemand) - parseFloat(windSpeed);
+            console.log("wind: " + windSpeed + " market: " + marketDemand)
+            if (price < 0) {
+                res.send("0");
+            }
+            res.send(price.toFixed(2));
+        })
+    })
 })
 
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`)
 })
+
+async function getWindSpeed() {
+    const windSpeed = await new Promise(function (resolve, reject) {
+        request('http://localhost:3001/', { json: true }, (err, res, body) => {
+            if (err) { return console.log(err); }
+            resolve(res.body)
+        })
+    });
+    return windSpeed;
+}
+
+async function getMarket() {
+    result = await market.findOne()
+    return result.Market;
+}
