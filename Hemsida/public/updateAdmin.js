@@ -1,7 +1,7 @@
 $(document).ready(function () {
     setStatus()
-    // setRatio()
-    // setPrice()
+    setRatio()
+    setPrice()
     updateUsers()
     updateBuffer()
     updateModelledPrice()
@@ -9,6 +9,7 @@ $(document).ready(function () {
     updatePower()
     updateStatus()
     updateImg()
+    updateMarketDemand()
 });
 
 async function setStatus() {
@@ -16,11 +17,31 @@ async function setStatus() {
         type: 'GET',
         url: '/getStatus',
         success: (status) => {
-            if(status){
-                $("#test").prop("checked", true);
+            if (status) {
+                $("#switch").prop("checked", true);
             } else {
-                $("#test").prop("checked", false);
-            }  
+                $("#switch").prop("checked", false);
+            }
+        }
+    })
+}
+async function setRatio() {
+    $.ajax({
+        type: 'GET',
+        url: '/getRatio',
+        success: (result) => {
+            $("#ratio").attr("value", parseFloat(result) * 100);
+            $("#ratio2").text(parseFloat(result) * 100);
+        }
+    })
+}
+async function setPrice() {
+    $.ajax({
+        type: 'GET',
+        url: '/getPrice',
+        success: (result) => {
+            $("#setPrice").attr("value", parseFloat(result));
+            $("#setPrice2").text(parseFloat(result));
         }
     })
 }
@@ -34,7 +55,6 @@ async function updateUsers() {
             $("#users").empty()
             for (var i = 0; i < users.length; i++) {
                 if (users[i].role == "prosumer") {
-                    marketDemand += parseFloat(users[i].market)
                     var trStart = $("<tr>")
 
                     var tdUserName = $("<td></td>").text(users[i].username)
@@ -72,7 +92,6 @@ async function updateUsers() {
                     $("#users").append(trStart, tdUserName, tdRole, tdStatus, tdConsumption, tdProduction, tdBuffer, tdBlock, tdUpdate, tdDelete, trEnd)
                 }
             }
-            $("#marketDemand").text(marketDemand.toFixed(2))
         }
     }).then(function () {
         setTimeout(updateUsers, 1000) //call itself every 1000ms
@@ -146,5 +165,17 @@ async function updateImg() {
         success: (data) => {
             $("#img").attr('src', data);
         }
+    });
+}
+
+async function updateMarketDemand() {
+    $.ajax({
+        type: 'GET',
+        url: '/getMarketDemand',
+        success: (data) => {
+            $("#marketDemand").text(data)
+        }
+    }).then(function () {
+        setTimeout(updateMarketDemand, 1000) //call itself every 1000ms
     });
 }

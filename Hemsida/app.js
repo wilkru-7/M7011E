@@ -2,8 +2,9 @@ var request = require('request');
 var express = require('express');
 var path = require('path');
 var ejs = require('ejs');
-var $ = require('jquery')
+var $ = require('jquery');
 var fs = require('fs');
+var jwt = require('jsonwebtoken');
 
 var bcrypt = require('bcrypt');
 const saltRounds = 10;
@@ -13,6 +14,14 @@ const fileUpload = require('express-fileupload');
 
 const app = express()
 const port = 3003
+
+const dotenv = require('dotenv');
+dotenv.config()
+
+function generateAccessToken(username) {
+    return jwt.sign(username, process.env.TOKEN_SECRET, { expiresIn: '1800s' });
+}
+
 var price, windspeed, consumption, production, netProduction, power, isOn;
 
 const { MongoClient } = require("mongodb");
@@ -23,6 +32,7 @@ const client = new MongoClient(uri);
 client.connect();
 const database = client.db('M7011E');
 const users = database.collection('Users');
+const market = database.collection('Market');
 
 app.use('/jquery', express.static(__dirname + '/node_modules/jquery/dist/'));
 
@@ -96,6 +106,16 @@ app.get('/getUsers', (req, res) => {
     })
 })
 
+app.get('/getRatio', (req, res) => {
+    getRatio().then(result => {
+        res.send(result + "")
+    })
+})
+
+app.get('/getMarketDemand', (req, res) => {
+    getMarketDemand().then(result => { res.send(result + "") });
+})
+
 app.get('/getPowerplant', (req, res) => {
     getPower().then(res.send(power + ""));
 })
@@ -133,7 +153,7 @@ app.post('/checkUpdateCredentials', (req, res) => {
     var password2 = req.body.registerPassword2;
 
     search(username).then(dontExists => {
-        if(dontExists && username != "" && password == "" && password2 == "") {
+        if (dontExists && username != "" && password == "" && password2 == "") {
             updateUsername(oldUsername, username).then(result => {
                 res.redirect('/admin')
             })
@@ -150,11 +170,11 @@ app.post('/checkUpdateCredentials', (req, res) => {
                     updateUsername(oldUsername, username).then(result => {
                         res.redirect('/admin')
                     })
-                }) 
+                })
             });
         } else {
             console.log("Something was entered wrong")
-            res.render('updateCredentials', {user: oldUsername})
+            res.render('updateCredentials', { user: oldUsername })
         }
     })
 })
@@ -174,6 +194,7 @@ app.post('/login', (req, res) => {
                 console.log("result: " + result.role)
                 req.session.role = result.role;
                 req.session.username = username;
+                loginDB(username)
                 res.redirect('/')
             } else {
                 res.redirect('login')
@@ -242,7 +263,7 @@ app.post('/register', (req, res) => {
         if (exists && password == password2) {
             bcrypt.hash(password, saltRounds, (err, hash) => {
                 // Now we can store the password hash in db.
-                insert(username, hash)
+                var token = insert(username, hash)
                 request('http://localhost:3000/startUser/' + username, { json: true }, (err, res, body) => {
                     if (err) { return console.log(err); }
                 });
@@ -252,6 +273,9 @@ app.post('/register', (req, res) => {
                 request('http://localhost:3005/startUser/' + username, { json: true }, (err, res, body) => {
                     if (err) { return console.log(err); }
                 });
+                /*                 res.cookie('token', token){
+                                    httpOnly: true
+                                } */
                 res.redirect('/login')
             });
         } else {
@@ -286,6 +310,15 @@ app.post('/sendToBuffer', (req, res) => {
     request('http://localhost:3005/setRatio/1/' + req.session.username + "/" + ratio1, { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
     });
+    res.redirect('/')
+})
+
+app.post('/sendRatioManager', (req, res) => {
+    let ratio1 = req.body.sendToBuffer / 100
+    request('http://localhost:3006/setRatio/' + ratio1, { json: true }, (err, res, body) => {
+        if (err) { return console.log(err); }
+    });
+    res.redirect('/')
 })
 
 app.post('/useFromBuffer', (req, res) => {
@@ -293,6 +326,7 @@ app.post('/useFromBuffer', (req, res) => {
     request('http://localhost:3005/setRatio/2/' + req.session.username + "/" + ratio2, { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
     });
+    res.redirect('/')
 })
 
 app.post('/setPrice', (req, res) => {
@@ -300,6 +334,7 @@ app.post('/setPrice', (req, res) => {
         if (err) { return console.log(err); }
     });
     price = req.body.setPrice
+    res.redirect('/')
 })
 
 app.post('/switch', (req, res) => {
@@ -317,6 +352,7 @@ app.post('/switch', (req, res) => {
             }
         });
     }
+    res.redirect('/')
 })
 
 app.listen(port, () => {
@@ -324,8 +360,11 @@ app.listen(port, () => {
 })
 
 async function insert(_username, _password) {
-    const insert = { username: _username, password: _password, buffer: 0, ratio1: 0.5, ratio2: 0.5, blocked: false, role: "prosumer" };
+    const token = generateAccessToken({ username: _username })
+    const insert = { username: _username, password: _password, buffer: 0, ratio1: 0.5, ratio2: 0.5, blocked: false, role: "prosumer", token: token };
+
     const result = await users.insertOne(insert);
+    return token
 }
 
 async function getWindspeed() {
@@ -400,6 +439,16 @@ async function getStatus() {
         console.log("isOn: " + isOn)
     })
     return isOn;
+}
+
+async function getMarketDemand() {
+    result = await market.findOne()
+    return result.MarketDemand;
+}
+
+async function getRatio() {
+    result = await market.findOne()
+    return result.ratio;
 }
 
 async function getNetProduction(username) {
@@ -527,7 +576,7 @@ async function updatePassword(_username, _password) {
 }
 
 async function updateUsername(oldUsername, newUsername) {
-    const filter = { username: oldUsername};
+    const filter = { username: oldUsername };
     const options = { upsert: true };
     const updateDoc = {
         $set: {

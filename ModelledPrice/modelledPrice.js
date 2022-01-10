@@ -16,8 +16,9 @@ app.get('/', (req, res) => {
             console.log("wind: " + windSpeed + " market: " + marketDemand)
             if (price < 0) {
                 res.send("0");
+            } else {
+                res.send(price.toFixed(2));
             }
-            res.send(price.toFixed(2));
         })
     })
 })
@@ -38,5 +39,5 @@ async function getWindSpeed() {
 
 async function getMarket() {
     result = await market.findOne()
-    return result.Market;
+    return result.MarketDemand;
 }

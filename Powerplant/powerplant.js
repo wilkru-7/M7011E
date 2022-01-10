@@ -5,6 +5,7 @@ const client = new MongoClient(uri);
 client.connect();
 const database = client.db('M7011E');
 const market = database.collection('Market');
+const users = database.collection('Users');
 
 const app = express()
 const port = 3006
@@ -53,6 +54,18 @@ function startPowerplant() {
     setStatus(true)
     setRatio(0.5)
     updatePower()
+    setInterval(updateDemand, 1000)
+}
+
+async function updateDemand() {
+    var getUsers = await findUsers()
+    var amount = 0;
+    getUsers.forEach(element => {
+        if (element.role == 'prosumer') {
+            amount += parseFloat(element.market)
+        }
+    })
+    updateMarketDemand(amount.toFixed(2))
 }
 
 async function updatePower() {
@@ -152,6 +165,18 @@ app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`)
 })
 
+async function updateMarketDemand(amount) {
+    const filter = {};
+    const options = { upsert: true };
+    const updateDoc = {
+        $set: {
+            MarketDemand: amount
+        },
+    };
+    const result = await market.updateOne(filter, updateDoc, options);
+    return result;
+}
+
 async function addToMarket(demand) {
     const filter = {};
     const options = { upsert: true };
@@ -228,5 +253,10 @@ async function setRatio(value) {
         },
     };
     const result = await market.updateOne(filter, updateDoc, options);
+    return result;
+}
+
+async function findUsers() {
+    result = await users.find().toArray();
     return result;
 }
