@@ -58,7 +58,7 @@ async function updateUsers() {
             $("#marketDemand").text(marketDemand.toFixed(2))
         }
     }).then(function () {
-        setTimeout(updateBuffer, 1000) //call itself every 1000ms
+        setTimeout(updateUsers, 1000) //call itself every 1000ms
     });
 }
 
