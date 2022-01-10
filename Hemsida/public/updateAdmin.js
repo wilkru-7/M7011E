@@ -1,4 +1,7 @@
 $(document).ready(function () {
+    setStatus()
+    // setRatio()
+    // setPrice()
     updateUsers()
     updateBuffer()
     updateModelledPrice()
@@ -7,6 +10,20 @@ $(document).ready(function () {
     updateStatus()
     updateImg()
 });
+
+async function setStatus() {
+    $.ajax({
+        type: 'GET',
+        url: '/getStatus',
+        success: (status) => {
+            if(status){
+                $("#test").prop("checked", true);
+            } else {
+                $("#test").prop("checked", false);
+            }  
+        }
+    })
+}
 
 async function updateUsers() {
     var marketDemand = 0;
@@ -19,7 +36,7 @@ async function updateUsers() {
                 if (users[i].role == "prosumer") {
                     marketDemand += parseFloat(users[i].market)
                     var trStart = $("<tr>")
-                    // var th = $("<th></th>").text(i)
+
                     var tdUserName = $("<td></td>").text(users[i].username)
                     var tdRole = $("<td></td>").text(users[i].role)
                     var tdStatus = $("<td></td>").text(users[i].status)
@@ -103,7 +120,6 @@ async function updatePower() {
         type: 'GET',
         url: '/getPowerplant',
         success: (power) => {
-            console.log("power is: " + power)
             $("#power").text(power)
         }
     }).then(function () {
@@ -122,14 +138,13 @@ async function updateStatus() {
         setTimeout(updateStatus, 1000) //call itself every 1000ms
     });
 }
+
 async function updateImg() {
     $.ajax({
         type: 'GET',
         url: '/getImg',
         success: (data) => {
-            console.log("data: " + data)
-            //updateData(data);
             $("#img").attr('src', data);
         }
-    })
+    });
 }
