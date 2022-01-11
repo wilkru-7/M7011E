@@ -112,6 +112,13 @@ app.get('/getRatio', (req, res) => {
     })
 })
 
+app.get('/getRatio/:number/', (req, res) => {
+    number = parseFloat(req.params['number'])
+    getRatioUser(number, req.session.username).then(ratio => {
+        res.send(ratio + "");
+    })
+})
+
 app.get('/getMarketDemand', (req, res) => {
     getMarketDemand().then(result => { res.send(result + "") });
 })
@@ -585,4 +592,16 @@ async function updateUsername(oldUsername, newUsername) {
     };
     const result = await users.updateOne(filter, updateDoc, options);
     return result;
+}
+
+async function getRatioUser(number, _username) {
+    const search = { username: _username };
+    var user = await users.findOne(search)
+    if (user) {
+        if (parseFloat(number) == 1) {
+            return user.ratio1;
+        } else {
+            return user.ratio2;
+        }
+    }
 }

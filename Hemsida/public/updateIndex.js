@@ -1,4 +1,6 @@
 $(document).ready(function () {
+    setRatio1()
+    setRatio2()
     updateWindspeed()
     updateModelledPrice()
     updateConsumption()
@@ -27,6 +29,29 @@ $(document).ready(function () {
        setTimeout(updateData, 10000) //call itself every 10000ms
     });
 } */
+
+async function setRatio1() {
+    $.ajax({
+        type: 'GET',
+        url: '/getRatio/1',
+        success: (result) => {
+            $("#ratio1").attr("value", parseFloat(result) * 100);
+            $("#ratio1_output").text(parseFloat(result) * 100);
+        }
+    })
+}
+
+async function setRatio2() {
+    $.ajax({
+        type: 'GET',
+        url: '/getRatio/2',
+        success: (result) => {
+            $("#ratio2").attr("value", parseFloat(result) * 100);
+            $("#ratio2_output").text(parseFloat(result) * 100);
+        }
+    })
+}
+
 async function updateWindspeed() {
     $.ajax({
         type: 'GET',
