@@ -271,13 +271,13 @@ app.post('/register', (req, res) => {
             bcrypt.hash(password, saltRounds, (err, hash) => {
                 // Now we can store the password hash in db.
                 var token = insert(username, hash)
-                request('http://localhost:3000/startUser/' + username, { json: true }, (err, res, body) => {
+                request('http://consumption:3000/startUser/' + username, { json: true }, (err, res, body) => {
                     if (err) { return console.log(err); }
                 });
-                request('http://localhost:3004/startUser/' + username, { json: true }, (err, res, body) => {
+                request('http://producer:3004/startUser/' + username, { json: true }, (err, res, body) => {
                     if (err) { return console.log(err); }
                 });
-                request('http://localhost:3005/startUser/' + username, { json: true }, (err, res, body) => {
+                request('http://buffer:3005/startUser/' + username, { json: true }, (err, res, body) => {
                     if (err) { return console.log(err); }
                 });
                 /*                 res.cookie('token', token){
@@ -314,7 +314,7 @@ app.get('/getImg', (req, res) => {
 
 app.post('/sendToBuffer', (req, res) => {
     let ratio1 = req.body.sendToBuffer / 100
-    request('http://localhost:3005/setRatio/1/' + req.session.username + "/" + ratio1, { json: true }, (err, res, body) => {
+    request('http://buffer:3005/setRatio/1/' + req.session.username + "/" + ratio1, { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
     });
     res.redirect('/')
@@ -322,7 +322,7 @@ app.post('/sendToBuffer', (req, res) => {
 
 app.post('/sendRatioManager', (req, res) => {
     let ratio1 = req.body.sendToBuffer / 100
-    request('http://localhost:3006/setRatio/' + ratio1, { json: true }, (err, res, body) => {
+    request('http://powerplant:3006/setRatio/' + ratio1, { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
     });
     res.redirect('/')
@@ -330,14 +330,14 @@ app.post('/sendRatioManager', (req, res) => {
 
 app.post('/useFromBuffer', (req, res) => {
     let ratio2 = req.body.useFromBuffer / 100
-    request('http://localhost:3005/setRatio/2/' + req.session.username + "/" + ratio2, { json: true }, (err, res, body) => {
+    request('http://buffer:3005/setRatio/2/' + req.session.username + "/" + ratio2, { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
     });
     res.redirect('/')
 })
 
 app.post('/setPrice', (req, res) => {
-    request('http://localhost:3007/setPrice/' + req.body.setPrice, { json: true }, (err, res, body) => {
+    request('http://price:3007/setPrice/' + req.body.setPrice, { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
     });
     price = req.body.setPrice
@@ -347,13 +347,13 @@ app.post('/setPrice', (req, res) => {
 app.post('/switch', (req, res) => {
     console.log("req.body.switch :" + req.body.switch)
     if (req.body.switch == "on") {
-        request('http://localhost:3006/start/', { json: true }, (err, res, body) => {
+        request('http://powerplant:3006/start/', { json: true }, (err, res, body) => {
             if (err) {
                 return console.log(err);
             }
         });
     } else {
-        request('http://localhost:3006/stop/', { json: true }, (err, res, body) => {
+        request('http://powerplant:3006/stop/', { json: true }, (err, res, body) => {
             if (err) {
                 return console.log(err);
             }
@@ -375,7 +375,7 @@ async function insert(_username, _password) {
 }
 
 async function getWindspeed() {
-    request('http://localhost:3001/', { json: true }, (err, res, body) => {
+    request('http://windspeed:3001/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         windspeed = res.body;
     });
@@ -384,7 +384,7 @@ async function getWindspeed() {
 
 async function getConsumption(username) {
     if (username != undefined) {
-        request('http://localhost:3000/getUser/' + username, { json: true }, (err, res, body) => {
+        request('http://consumption:3000/getUser/' + username, { json: true }, (err, res, body) => {
             if (err) { return console.log(err); }
             consumption = res.body;
         })
@@ -395,7 +395,7 @@ async function getConsumption(username) {
 async function getBuffer(username) {
     if (username != undefined) {
         const buffer = await new Promise(function (resolve, reject) {
-            request('http://localhost:3005/getBuffer/' + username, { json: true }, (err, res, body) => {
+            request('http://buffer:3005/getBuffer/' + username, { json: true }, (err, res, body) => {
                 if (err) { return console.log(err); }
                 resolve(res.body)
             })
@@ -405,7 +405,7 @@ async function getBuffer(username) {
 }
 
 async function getProduction(username) {
-    request('http://localhost:3004/getUser/' + username, { json: true }, (err, res, body) => {
+    request('http://producer:3004/getUser/' + username, { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         production = res.body;
     });
@@ -414,7 +414,7 @@ async function getProduction(username) {
 
 async function getModelledPrice() {
     const modelledPrice = await new Promise(function (resolve, reject) {
-        request('http://localhost:3002/', { json: true }, (err, res, body) => {
+        request('http://modelledprice:3002/', { json: true }, (err, res, body) => {
             if (err) { return console.log(err); }
             resolve(res.body)
         })
@@ -423,7 +423,7 @@ async function getModelledPrice() {
 }
 
 async function getPrice() {
-    request('http://localhost:3007/', { json: true }, (err, res, body) => {
+    request('http://price:3007/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         price = res.body;
     })
@@ -431,7 +431,7 @@ async function getPrice() {
 }
 
 async function getPower() {
-    request('http://localhost:3006/', { json: true }, (err, res, body) => {
+    request('http://powerplant:3006/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         power = res.body;
     })
@@ -439,7 +439,7 @@ async function getPower() {
 }
 
 async function getStatus() {
-    request('http://localhost:3006/status', { json: true }, (err, res, body) => {
+    request('http://powerplant:3006/status', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         isOn = res.body;
 
@@ -548,7 +548,7 @@ async function getImg(_username) {
 
 async function getBufferManager() {
     const market = await new Promise(function (resolve, reject) {
-        request('http://localhost:3006/getBuffer/', { json: true }, (err, res, body) => {
+        request('http://powerplant:3006/getBuffer/', { json: true }, (err, res, body) => {
             if (err) { return console.log(err); }
             resolve(res.body)
         })
