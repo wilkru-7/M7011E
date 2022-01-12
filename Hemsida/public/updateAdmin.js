@@ -68,7 +68,7 @@ async function updateUsers() {
                     var tdBlock = '<td>'
                     var tdBlock1 = '<form method="POST">'
                     var tdBlock2 = '<input type="hidden" name="username" value="' + users[i].username + '">'
-                    var tdBlock3 = '<input class="mx-auto col-6 btn btn-primary active" type="submit" value="Block" formaction="/block">'
+                    var tdBlock3 = '<input class="mx-auto btn btn-primary active" type="submit" value="Block" formaction="/block">'
                     var tdBlock4 = '</form></td>'
                     var tdBlock = tdBlock.concat(tdBlock1, tdBlock2, tdBlock3, tdBlock4)
 
@@ -76,7 +76,7 @@ async function updateUsers() {
                     var tdUpdate = '<td>'
                     var tdUpdate1 = ' <form class="" method="POST">'
                     var tdUpdate2 = '<input type="hidden" name="username" value="' + users[i].username + '">'
-                    var tdUpdate3 = '<input class="mx-auto col-6 btn btn-primary active" type="submit" value="Update" formaction="/updateCredentials" >'
+                    var tdUpdate3 = '<input class="mx-auto btn btn-primary active" type="submit" value="Update" formaction="/updateCredentials" >'
                     var tdUpdate4 = '</form></td>'
                     tdUpdate = tdUpdate.concat(tdUpdate1, tdUpdate2, tdUpdate3, tdUpdate4)
 
