@@ -225,7 +225,7 @@ async function deleteUser(_username) {
 
 async function getNetProduction(username) {
     const netProduction = await new Promise(function (resolve, reject) {
-        request('http://localhost:3003/getNetProduction/' + username, { json: true }, (err, res, body) => {
+        request('http://hemsida:3003/getNetProduction/' + username, { json: true }, (err, res, body) => {
             if (err) { return console.log(err); }
             resolve(res.body)
         })
