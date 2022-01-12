@@ -374,9 +374,9 @@ app.listen(port, () => {
 async function insert(_username, _password, admin) {
     const token = generateAccessToken({ username: _username })
     if(!admin){
-        const insert = { username: _username, password: _password, buffer: 0, ratio1: 0.5, ratio2: 0.5, blocked: false, role: "prosumer", token: token };
+        var insert = { username: _username, password: _password, buffer: 0, ratio1: 0.5, ratio2: 0.5, blocked: false, role: "prosumer", token: token };
     }else{
-        const insert = { username: _username, password: _password, buffer: 0, ratio1: 0.5, ratio2: 0.5, blocked: false, role: "manager", token: token };
+        var insert = { username: _username, password: _password, buffer: 0, ratio1: 0.5, ratio2: 0.5, blocked: false, role: "manager", token: token };
     }
     
 
