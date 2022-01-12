@@ -35,8 +35,12 @@ const users = database.collection('Users');
 const market = database.collection('Market')
 
 //Create admin on deployment
-bcrypt.hash("hej", saltRounds, (err, hash) => {
-    insert("admin", hash, true)
+search("admin").then(dontExists => {
+    if(dontExists){
+        bcrypt.hash("hej", saltRounds, (err, hash) => {
+            insert("admin", hash, true)
+        })
+    }
 })
 
 app.use('/jquery', express.static(__dirname + '/node_modules/jquery/dist/'));
