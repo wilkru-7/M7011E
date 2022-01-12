@@ -26,7 +26,7 @@ var price, windspeed, consumption, production, netProduction, power, isOn;
 
 const { MongoClient } = require("mongodb");
 
-const uri = "mongodb://localhost:27017/";
+const uri = "mongodb://mongodb:27017/";
 const client = new MongoClient(uri);
 
 client.connect();
