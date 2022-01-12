@@ -2,7 +2,7 @@ var request = require('request');
 const express = require('express')
 const { MongoClient } = require("mongodb");
 
-const uri = "mongodb://localhost:27017/";
+const uri = "mongodb://mongodb:27017/";
 const client = new MongoClient(uri);
 
 client.connect();
@@ -81,13 +81,13 @@ app.listen(port, () => {
 })
 
 async function sendToMarket(amount) {
-    request('http://localhost:3006/sellToMarket/' + amount, { json: true }, (err, res, body) => {
+    request('http://powerplant:3006/sellToMarket/' + amount, { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
     })
 }
 async function buyFromMarket(amount) {
     var result
-    request('http://localhost:3006/buyFromMarket/' + amount, { json: true }, (err, res, body) => {
+    request('http://powerplant:3006/buyFromMarket/' + amount, { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         result = res.body
     })
@@ -202,7 +202,6 @@ async function updateBuffer(username) {
                     }
                     var result = buyFromMarket(fromMarket)
                     if (result == "empty") {
-
                         setUserBlackOut(username, true)
                     }
                     else {
@@ -236,7 +235,7 @@ async function getNetProduction(username) {
 
 async function sellToMarket(amount) {
     const market = await new Promise(function (resolve, reject) {
-        request('http://localhost:3006/sellToMarket/' + amount, { json: true }, (err, res, body) => {
+        request('http://powerplant:3006/sellToMarket/' + amount, { json: true }, (err, res, body) => {
             if (err) { return console.log(err); }
             resolve(res.body)
         })
@@ -248,7 +247,7 @@ async function getConsumption(username) {
     if (username != undefined) {
         console.log("Username: " + username)
         var consumption;
-        request('http://localhost:3000/getUser/' + username, { json: true }, (err, res, body) => {
+        request('http://consumer:3000/getUser/' + username, { json: true }, (err, res, body) => {
             if (err) { return console.log(err); }
             consumption = res.body;
         })
@@ -258,7 +257,7 @@ async function getConsumption(username) {
 
 async function getProduction(username) {
     var production;
-    request('http://localhost:3004/getUser/' + username, { json: true }, (err, res, body) => {
+    request('http://producer:3004/getUser/' + username, { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         production = res.body;
     });
@@ -267,7 +266,7 @@ async function getProduction(username) {
 
 async function getPowerPlantProduction() {
     const production = await new Promise(function (resolve, reject) {
-        request('http://localhost:3006/', { json: true }, (err, res, body) => {
+        request('http://powerplant:3006/', { json: true }, (err, res, body) => {
             if (err) { return console.log(err); }
             resolve(res.body)
         })

@@ -3,7 +3,7 @@ var gaussian = require('gaussian');
 var request = require('request');
 const { MongoClient } = require("mongodb");
 
-const uri = "mongodb://localhost:27017/";
+const uri = "mongodb://mongodb:27017/";
 const client = new MongoClient(uri);
 client.connect();
 const database = client.db('M7011E');
@@ -56,7 +56,7 @@ async function updateProduction(producer) {
         return
     }
     var windSpeed;
-    request('http://localhost:3001/', { json: true }, (err, res, body) => {
+    request('http://windspeed:3001/', { json: true }, (err, res, body) => {
         if (err) { return console.log(err); }
         windSpeed = res.body;
         var random = productionDistribution.ppf(Math.random())

@@ -1,6 +1,6 @@
 const request = require('request');
 const { MongoClient } = require("mongodb");
-const uri = "mongodb://localhost:27017/";
+const uri = "mongodb://mongodb:27017/";
 const client = new MongoClient(uri);
 client.connect();
 const database = client.db('M7011E');
@@ -29,7 +29,7 @@ app.listen(port, () => {
 
 async function getWindSpeed() {
     const windSpeed = await new Promise(function (resolve, reject) {
-        request('http://localhost:3001/', { json: true }, (err, res, body) => {
+        request('http://windspeed:3001/', { json: true }, (err, res, body) => {
             if (err) { return console.log(err); }
             resolve(res.body)
         })

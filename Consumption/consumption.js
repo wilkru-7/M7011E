@@ -5,7 +5,7 @@ var gaussian = require('gaussian');
 const client = new Influx('http://127.0.0.1:8086/'); */
 
 const { MongoClient } = require("mongodb");
-const uri = "mongodb://localhost:27017/";
+const uri = "mongodb://mongodb:27017/";
 const client = new MongoClient(uri);
 client.connect();
 const database = client.db('M7011E');

@@ -119,6 +119,10 @@ services:
         delay: 5s
         max_attempts: 3
         window: 10s
+  mongodb:
+    image: mongo:5.0
+    ports:
+      - "27017:27017"
 
 #    ports:
 #      - "4000:80"
