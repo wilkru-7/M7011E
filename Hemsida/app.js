@@ -32,7 +32,12 @@ const client = new MongoClient(uri);
 client.connect();
 const database = client.db('M7011E');
 const users = database.collection('Users');
-const market = database.collection('Market');
+const market = database.collection('Market')
+
+//Create admin on deployment
+bcrypt.hash("hej", saltRounds, (err, hash) => {
+    insert("admin", hash, true)
+})
 
 app.use('/jquery', express.static(__dirname + '/node_modules/jquery/dist/'));
 
@@ -270,7 +275,7 @@ app.post('/register', (req, res) => {
         if (exists && password == password2) {
             bcrypt.hash(password, saltRounds, (err, hash) => {
                 // Now we can store the password hash in db.
-                var token = insert(username, hash)
+                var token = insert(username, hash, false)
                 request('http://consumption:3000/startUser/' + username, { json: true }, (err, res, body) => {
                     if (err) { return console.log(err); }
                 });
@@ -366,9 +371,14 @@ app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`)
 })
 
-async function insert(_username, _password) {
+async function insert(_username, _password, admin) {
     const token = generateAccessToken({ username: _username })
-    const insert = { username: _username, password: _password, buffer: 0, ratio1: 0.5, ratio2: 0.5, blocked: false, role: "prosumer", token: token };
+    if(!admin){
+        const insert = { username: _username, password: _password, buffer: 0, ratio1: 0.5, ratio2: 0.5, blocked: false, role: "prosumer", token: token };
+    }else{
+        const insert = { username: _username, password: _password, buffer: 0, ratio1: 0.5, ratio2: 0.5, blocked: false, role: "manager", token: token };
+    }
+    
 
     const result = await users.insertOne(insert);
     return token
