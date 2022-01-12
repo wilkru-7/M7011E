@@ -7,6 +7,10 @@
 
 version: "3"
 services:
+  mongodb:
+    image: mongo:5.0
+    ports:
+      - "27017:27017"
   buffer:
     image: buffer:latest # Make sure your Docker image has this name.
     ports:
@@ -119,10 +123,6 @@ services:
         delay: 5s
         max_attempts: 3
         window: 10s
-  mongodb:
-    image: mongo:5.0
-    ports:
-      - "27017:27017"
 
 #    ports:
 #      - "4000:80"
