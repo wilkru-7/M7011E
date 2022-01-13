@@ -197,26 +197,34 @@ app.post('/checkUpdateCredentials', (req, res) => {
 app.post('/login', (req, res) => {
     /* TODO:
         Check input so no hacking */
-    var username = req.body.username;
-    var password = req.body.password;
-    login(username).then(result => {
-        bcrypt.compare(password, result.password, function (err, response) {
-            if (err) {
-                // handle error
-            }
-            if (response) {
-                // Send JWT
-                req.session.loggedin = true;
-                console.log("result: " + result.role)
-                req.session.role = result.role;
-                req.session.username = username;
-                loginDB(username)
-                res.redirect('/')
-            } else {
-                res.redirect('login')
-            }
-        });
-    })
+        var username = req.body.username;
+        var password = req.body.password;
+        if (username != "" && password != "") {
+            login(username).then(result => {
+                if (result) {
+                    bcrypt.compare(password, result.password, function (err, response) {
+                        if (err) {
+                            // handle error
+                        }
+                        if (response) {
+                            // Send JWT
+                            req.session.loggedin = true;
+                            console.log("result: " + result.role)
+                            req.session.role = result.role;
+                            req.session.username = username;
+                            setStatusUser(username, "Online")
+                            res.redirect('/')
+                        } else {
+                            res.redirect('login')
+                        }
+                });
+                } else {
+                    res.redirect('/login')
+                }
+            })
+        } else {
+            res.redirect('/login')
+        }
 })
 
 app.post('/redirectregister', (req, res) => {
