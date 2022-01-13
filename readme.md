@@ -1,6 +1,6 @@
 # Steps to build and run the project
 
-## 1. Build all the containers by running the following command in the right folder
+## 1. Build all the containers by running the following command in the respective folder
  - `docker build -t buffer .`
  - `docker build -t consumption .`
  - `docker build -t modelledprice .`
@@ -10,7 +10,7 @@
  - `docker build -t producer .`
  - `docker build -t hemsida .`
 
-## 2. Deploy the application by running the following command in the temp folder.
+## 2. Deploy the application by running the following command in the deployment folder.
  - `docker-compose up`
 
 # Steps do update services
