@@ -9,10 +9,12 @@ version: "3"
 services:
   mongodb:
     image: mongo:5.0
+    restart: always
     ports:
       - "27017:27017"
   buffer:
     image: buffer:latest # Make sure your Docker image has this name.
+    restart: always
     ports:
       - "3005:3005"
     stdin_open: true
@@ -27,6 +29,7 @@ services:
         window: 10s
   consumption:
     image: consumption:latest # Make sure your Docker image has this name.
+    restart: always
     ports:
       - "3000:3000"
     stdin_open: true
@@ -41,6 +44,7 @@ services:
         window: 10s
   hemsida:
     image: hemsida:latest # Make sure your Docker image has this name.
+    restart: always
     ports:
       - "3003:3003"
     stdin_open: true
@@ -55,6 +59,7 @@ services:
         window: 10s
   modelledPrice:
     image: modelledprice:latest # Make sure your Docker image has this name.
+    restart: always
     ports:
       - "3002:3002"
     stdin_open: true
@@ -69,6 +74,7 @@ services:
         window: 10s
   price:
     image: price:latest # Make sure your Docker image has this name.
+    restart: always
     ports:
       - "3007:3007"
     stdin_open: true
@@ -83,6 +89,7 @@ services:
         window: 10s
   windspeed:
     image: windspeed:latest # Make sure your Docker image has this name.
+    restart: always
     ports:
       - "3001:3001"
     stdin_open: true
@@ -97,6 +104,7 @@ services:
         window: 10s
   powerplant:
     image: powerplant:latest # Make sure your Docker image has this name.
+    restart: always
     ports:
       - "3006:3006"
     stdin_open: true
@@ -111,6 +119,7 @@ services:
         window: 10s
   producer:
     image: producer:latest # Make sure your Docker image has this name.
+    restart: always
     ports:
       - "3004:3004"
     stdin_open: true
