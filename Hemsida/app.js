@@ -212,7 +212,7 @@ app.post('/login', (req, res) => {
                             console.log("result: " + result.role)
                             req.session.role = result.role;
                             req.session.username = username;
-                            setStatusUser(username, "Online")
+                            loginDB(username)
                             res.redirect('/')
                         } else {
                             res.redirect('login')
