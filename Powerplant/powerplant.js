@@ -70,7 +70,7 @@ async function updateDemand() {
 
 async function updatePower() {
     if (isOn) {
-        power = 40000;
+        power = 40;
         var ratio = await getRatio()
         updateBuffer(power * parseFloat(ratio))
     }
