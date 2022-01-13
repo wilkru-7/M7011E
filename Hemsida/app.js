@@ -190,24 +190,32 @@ app.post('/login', (req, res) => {
         Check input so no hacking */
     var username = req.body.username;
     var password = req.body.password;
-    login(username).then(result => {
-        bcrypt.compare(password, result.password, function (err, response) {
-            if (err) {
-                // handle error
-            }
-            if (response) {
-                // Send JWT
-                req.session.loggedin = true;
-                console.log("result: " + result.role)
-                req.session.role = result.role;
-                req.session.username = username;
-                loginDB(username)
-                res.redirect('/')
+    if (username != "" && password != "") {
+        login(username).then(result => {
+            if (result) {
+                bcrypt.compare(password, result.password, function (err, response) {
+                    if (err) {
+                        // handle error
+                    }
+                    if (response) {
+                        // Send JWT
+                        req.session.loggedin = true;
+                        console.log("result: " + result.role)
+                        req.session.role = result.role;
+                        req.session.username = username;
+                        setStatusUser(username, "Online")
+                        res.redirect('/')
+                    } else {
+                        res.redirect('login')
+                    }
+            });
             } else {
-                res.redirect('login')
+                res.redirect('/login')
             }
-        });
-    })
+        })
+    } else {
+        res.redirect('/login')
+    }
 })
 
 app.post('/redirectregister', (req, res) => {
@@ -220,7 +228,7 @@ app.post('/redirectlogin', (req, res) => {
 
 app.get('/logout', (req, res) => {
     req.session.loggedin = false
-    logoutDB(req.session.username)
+    setStatusUser(req.session.username, "Offline")
     res.redirect('/login')
 })
 
@@ -484,23 +492,12 @@ async function search(_username) {
         return false
     }
 }
-async function loginDB(_username) {
+async function setStatusUser(_username, status) {
     const filter = { username: _username };
     const options = { upsert: true };
     const updateDoc = {
         $set: {
-            status: "Online"
-        },
-    };
-    const result = await users.updateOne(filter, updateDoc, options);
-    return result;
-}
-async function logoutDB(_username) {
-    const filter = { username: _username };
-    const options = { upsert: true };
-    const updateDoc = {
-        $set: {
-            status: "Offline"
+            status: status
         },
     };
     const result = await users.updateOne(filter, updateDoc, options);
