@@ -1,5 +1,5 @@
 # Welcome
-## Here follows simple instructions to run our projet, for more detail see "M7011E Repord.pdf"
+## Here follows simple instructions to run our project, for more detail see "M7011E Report.pdf"
 
 # Steps to build and run the project
 
