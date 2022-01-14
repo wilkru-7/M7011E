@@ -76,7 +76,7 @@ async function updatePower() {
             ratio = 0.5
         }
         updateBuffer(power * parseFloat(ratio))
-        addToMarket(power * (1-parseFloat(ratio)))
+        addToMarket(power * (1 - parseFloat(ratio)))
     }
     setTimeout(updatePower, 1000)
 }
@@ -152,7 +152,7 @@ app.get('/buyFromMarket/:amount', (req, res) => {
                         res.send("not empty")
                     } else {
                         removeFromBuffer(buffer)
-                        res.send("empty")                        
+                        res.send("empty")
                     }
                 })
             }
@@ -185,14 +185,14 @@ async function updateMarketDemand(amount) {
 }
 
 async function addToMarket(demand) {
-    const filter = {};
+    const filter = { Market: { $lte: 500 } };
     const options = { upsert: true };
     const updateDoc = {
         $inc: {
             Market: demand
         },
     };
-    const result = await market.updateOne(filter, updateDoc, options);
+    const result = await market.findOneAndUpdate(filter, updateDoc, options);
     return result;
 }
 
