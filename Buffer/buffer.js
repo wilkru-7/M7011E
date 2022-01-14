@@ -86,12 +86,13 @@ async function sendToMarket(amount) {
     })
 }
 async function buyFromMarket(amount) {
-    var result
-    request('http://localhost:3006/buyFromMarket/' + amount, { json: true }, (err, res, body) => {
-        if (err) { return console.log(err); }
-        result = res.body
-    })
-    return result
+    const result = await new Promise(function (resolve, reject) {
+        request('http://localhost:3006/buyFromMarket/' + amount, { json: true }, (err, res, body) => {
+            if (err) { return console.log(err); }
+            resolve(res.body)
+        })
+    });
+    return result;
 }
 /* async function setBufferForUser(username, amount) {
     request('http://localhost:3005/addToBuffer/' + username + "/" + amount, { json: true }, (err, res, body) => {
@@ -171,11 +172,13 @@ async function updateBuffer(username) {
         }
         var buffer;
         var netProduction = await getNetProduction(username)
+        console.log("buffer: " + buffer + " netproduction: " + netProduction)
         if (netProduction) {
             var bufferTemp = await getBuffer(username)
             if (!isNaN(netProduction) && bufferTemp != undefined) {
                 //Over-Production
                 if (netProduction >= 0) {
+                    console.log("POSITIVE NETPRODUCTION")
                     var ratio1 = parseFloat(await getRatio(1, username))
                     var toBuffer = parseFloat(ratio1 * netProduction)
                     var toMarket = parseFloat(netProduction - toBuffer)
@@ -193,6 +196,7 @@ async function updateBuffer(username) {
                 //sold to the market and how much should be sent to 
                 //the buffer
                 else {
+                    console.log("NEGATIVE NETPRODUCTION")
                     var ratio2 = parseFloat(await getRatio(2, username))
                     var fromBuffer = parseFloat(ratio2 * netProduction)
                     var fromMarket = -parseFloat(netProduction - fromBuffer)
@@ -202,6 +206,7 @@ async function updateBuffer(username) {
                         buffer = 0
                     }
                     var result = await buyFromMarket(fromMarket)
+                    console.log("Market result is: " + result)
                     if (result == "empty") {
                         setUserBlackOut(username, true)
                     }

@@ -17,13 +17,15 @@ async function setStatus() {
         type: 'GET',
         url: '/getStatus',
         success: (status) => {
-            if (status) {
+            if (status != "Stopped") {
                 $("#switch").prop("checked", true);
             } else {
                 $("#switch").prop("checked", false);
             }
         }
-    })
+    }).then(function () {
+        setTimeout(setStatus, 1000) //call itself every 1000ms
+    });
 }
 async function setRatio() {
     $.ajax({

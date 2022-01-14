@@ -51,8 +51,8 @@ async function getStatus() {
 }
 
 function startPowerplant() {
-    setStatus(true)
-    setRatio(0.5)
+    // setStatus(true)
+    // setRatio(0.5)
     updatePower()
     setInterval(updateDemand, 1000)
 }
@@ -72,7 +72,11 @@ async function updatePower() {
     if (isOn) {
         power = 40;
         var ratio = await getRatio()
+        if (ratio == undefined) {
+            ratio = 0.5
+        }
         updateBuffer(power * parseFloat(ratio))
+        addToMarket(power * (1-parseFloat(ratio)))
     }
     setTimeout(updatePower, 1000)
 }
@@ -125,32 +129,35 @@ app.get('/sellToMarket/:amount', (req, res) => {
 })
 
 app.get('/buyFromMarket/:amount', (req, res) => {
-    amount = req.params['amount']
+    var amount = parseFloat(req.params['amount'])
     if (amount > 0) {
-        getMarket().then(result => {
-            if (amount > result) {
-                getStatus().then(status => {
-                    if (status) {
-                        removeFromMarket(result)
-                    } else {
-                        removeFromBuffer(result)
-                    }
-                })
-                res.send("empty")
+        getStatus().then(status => {
+            if (status == undefined) {
+                status = "Running"
             }
-            else {
-                getStatus().then(status => {
-                    if (status) {
+            if (status == "Running") {
+                getMarket().then(market => {
+                    if (amount <= market) {
                         removeFromMarket(amount)
+                        res.send("not empty")
                     } else {
-                        removeFromBuffer(amount)
+                        removeFromMarket(market)
+                        res.send("empty")
                     }
                 })
-                res.send("0")
+            } else {
+                getBuffer().then(buffer => {
+                    if (amount <= buffer) {
+                        removeFromBuffer(amount)
+                        res.send("not empty")
+                    } else {
+                        removeFromBuffer(buffer)
+                        res.send("empty")                        
+                    }
+                })
             }
         })
-    }
-    else {
+    } else {
         res.send("not ok")
     }
 })

@@ -11,9 +11,9 @@ const port = 3002
 
 app.get('/', (req, res) => {
     getWindSpeed().then(windSpeed => {
-        getMarket().then(marketDemand => {
+        getMarketDemand().then(marketDemand => {
             var price = 2 * parseFloat(marketDemand) - parseFloat(windSpeed);
-            console.log("wind: " + windSpeed + " market: " + marketDemand)
+            console.log("wind: " + windSpeed + " marketDemand: " + marketDemand)
             if (price < 0) {
                 res.send("0");
             } else {
@@ -37,7 +37,9 @@ async function getWindSpeed() {
     return windSpeed;
 }
 
-async function getMarket() {
+async function getMarketDemand() {
     result = await market.findOne()
-    return result.MarketDemand;
+    if(result) {
+        return result.MarketDemand;
+    }
 }
