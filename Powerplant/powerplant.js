@@ -185,14 +185,14 @@ async function updateMarketDemand(amount) {
 }
 
 async function addToMarket(demand) {
-    const filter = { Market: { $lte: 500 } };
+    const filter = {};
     const options = { upsert: true };
     const updateDoc = {
         $inc: {
             Market: demand
         },
     };
-    const result = await market.findOneAndUpdate(filter, updateDoc, options);
+    const result = await market.updateOne(filter, updateDoc, options);
     return result;
 }
 
@@ -233,14 +233,14 @@ async function getBuffer() {
 
 
 async function updateBuffer(amount) {
-    const filter = {};
+    const filter = { Market: { $lte: 500 } };
     const options = { upsert: true };
     var updateDoc = {
         $inc: {
             buffer: parseFloat(amount)
         },
     };
-    const result = await market.updateOne(filter, updateDoc, options);
+    const result = await market.findOneAndUpdate(filter, updateDoc, options);
     return result;
 }
 
