@@ -1,5 +1,5 @@
 const { MongoClient } = require("mongodb");
-const uri = "mongodb://localhost:27017/";
+const uri = "mongodb://mongodb:27017/";
 const client = new MongoClient(uri);
 client.connect();
 const database = client.db('M7011E');
@@ -15,7 +15,7 @@ app.use(express.urlencoded({
 }))
 app.get('/', (req, res) => {
     getPrice().then(result => {
-        if(result != undefined){
+        if (result != undefined) {
             res.send(result + "");
         } else {
             res.send("0")
@@ -33,7 +33,7 @@ app.listen(port, () => {
 })
 
 async function insertPrice(value) {
-    const filter = { };
+    const filter = {};
     const options = { upsert: true };
     const updateDoc = {
         $set: {
