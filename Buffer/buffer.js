@@ -186,6 +186,7 @@ async function updateBuffer(username) {
                         buffer = netProduction
                     }
                     setMarketDemand(username, 0)
+                    setUserBlackOut(username, false)
                 }
                 //In case of excessive production, Prosumer should be 
                 //able to control the ratio of how much should be 
@@ -200,9 +201,8 @@ async function updateBuffer(username) {
                         fromMarket = -parseFloat(netProduction - fromBuffer - buffer)
                         buffer = 0
                     }
-                    var result = buyFromMarket(fromMarket)
+                    var result = await buyFromMarket(fromMarket)
                     if (result == "empty") {
-
                         setUserBlackOut(username, true)
                     }
                     else {
@@ -218,6 +218,35 @@ async function updateBuffer(username) {
         }
     }
 }
+
+async function getConsumption(username) {
+    if (username != undefined) {
+        request('http://localhost:3000/getUser/' + username, { json: true }, (err, res, body) => {
+            if (err) { return console.log(err); }
+            consumption = res.body;
+        })
+        return consumption;
+    }
+}
+
+async function getProduction(username) {
+    request('http://localhost:3004/getUser/' + username, { json: true }, (err, res, body) => {
+        if (err) { return console.log(err); }
+        production = res.body;
+    });
+    return production;
+}
+
+/* async function getNetProduction(username) {
+    var consumption = await getConsumption(username);
+    consumption = parseFloat(consumption)
+    var production = await getProduction(username);
+    production = parseFloat(production)
+    if (!isNaN(production - consumption)) {
+        var netProduction = (production - consumption).toFixed(2);
+        return netProduction;
+    }
+} */
 
 async function deleteUser(_username) {
     const search = { username: _username };
@@ -244,27 +273,6 @@ async function sellToMarket(amount) {
     return market;
 }
 
-async function getConsumption(username) {
-    if (username != undefined) {
-        console.log("Username: " + username)
-        var consumption;
-        request('http://localhost:3000/getUser/' + username, { json: true }, (err, res, body) => {
-            if (err) { return console.log(err); }
-            consumption = res.body;
-        })
-        return consumption;
-    }
-}
-
-async function getProduction(username) {
-    var production;
-    request('http://localhost:3004/getUser/' + username, { json: true }, (err, res, body) => {
-        if (err) { return console.log(err); }
-        production = res.body;
-    });
-    return production;
-}
-
 async function getPowerPlantProduction() {
     const production = await new Promise(function (resolve, reject) {
         request('http://localhost:3006/', { json: true }, (err, res, body) => {
@@ -274,7 +282,6 @@ async function getPowerPlantProduction() {
     });
     return production;
 }
-
 
 async function isUserDeleted(_username) {
     const search = { username: _username };
