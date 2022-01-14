@@ -171,11 +171,13 @@ async function updateBuffer(username) {
         }
         var buffer;
         var netProduction = await getNetProduction(username)
+        console.log("buffer: " + buffer + " netproduction: " + netProduction)
         if (netProduction) {
             var bufferTemp = await getBuffer(username)
             if (!isNaN(netProduction) && bufferTemp != undefined) {
                 //Over-Production
                 if (netProduction >= 0) {
+                    console.log("POSITIVE NETPRODUCTION")
                     var ratio1 = parseFloat(await getRatio(1, username))
                     var toBuffer = parseFloat(ratio1 * netProduction)
                     var toMarket = parseFloat(netProduction - toBuffer)
@@ -186,12 +188,14 @@ async function updateBuffer(username) {
                         buffer = netProduction
                     }
                     setMarketDemand(username, 0)
+                    setUserBlackOut(username, false)
                 }
                 //In case of excessive production, Prosumer should be 
                 //able to control the ratio of how much should be 
                 //sold to the market and how much should be sent to 
                 //the buffer
                 else {
+                    console.log("NEGATIVE NETPRODUCTION")
                     var ratio2 = parseFloat(await getRatio(2, username))
                     var fromBuffer = parseFloat(ratio2 * netProduction)
                     var fromMarket = -parseFloat(netProduction - fromBuffer)
@@ -200,7 +204,8 @@ async function updateBuffer(username) {
                         fromMarket = -parseFloat(netProduction - fromBuffer - buffer)
                         buffer = 0
                     }
-                    var result = buyFromMarket(fromMarket)
+                    var result = await buyFromMarket(fromMarket)
+                    console.log("Market result is: " + result)
                     if (result == "empty") {
                         setUserBlackOut(username, true)
                     }
@@ -217,6 +222,35 @@ async function updateBuffer(username) {
         }
     }
 }
+
+async function getConsumption(username) {
+    if (username != undefined) {
+        request('http://localhost:3000/getUser/' + username, { json: true }, (err, res, body) => {
+            if (err) { return console.log(err); }
+            consumption = res.body;
+        })
+        return consumption;
+    }
+}
+
+async function getProduction(username) {
+    request('http://localhost:3004/getUser/' + username, { json: true }, (err, res, body) => {
+        if (err) { return console.log(err); }
+        production = res.body;
+    });
+    return production;
+}
+
+/* async function getNetProduction(username) {
+    var consumption = await getConsumption(username);
+    consumption = parseFloat(consumption)
+    var production = await getProduction(username);
+    production = parseFloat(production)
+    if (!isNaN(production - consumption)) {
+        var netProduction = (production - consumption).toFixed(2);
+        return netProduction;
+    }
+} */
 
 async function deleteUser(_username) {
     const search = { username: _username };
@@ -273,7 +307,6 @@ async function getPowerPlantProduction() {
     });
     return production;
 }
-
 
 async function isUserDeleted(_username) {
     const search = { username: _username };

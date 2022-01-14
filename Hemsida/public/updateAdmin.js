@@ -17,13 +17,15 @@ async function setStatus() {
         type: 'GET',
         url: '/getStatus',
         success: (status) => {
-            if (status) {
+            if (status != "Stopped") {
                 $("#switch").prop("checked", true);
             } else {
                 $("#switch").prop("checked", false);
             }
         }
-    })
+    }).then(function () {
+        setTimeout(setStatus, 1000) //call itself every 1000ms
+    });
 }
 async function setRatio() {
     $.ajax({
@@ -63,7 +65,7 @@ async function updateUsers() {
                     var tdConsumption = $("<td></td>").text(users[i].consumption)
                     var tdProduction = $("<td></td>").text(users[i].production)
                     var tdBuffer = $("<td></td>").text(users[i].buffer)
-
+                    var tdBlackedout = $("<td></td>").text(users[i].blackedOut)
                     /* Block Button */
                     var tdBlock = '<td>'
                     var tdBlock1 = '<form method="POST">'
@@ -89,7 +91,7 @@ async function updateUsers() {
                     tdDelete = tdDelete.concat(tdDelete1, tdDelete2, tdDelete3, tdDelete4)
 
                     var trEnd = $("</tr>")
-                    $("#users").append(trStart, tdUserName, tdRole, tdStatus, tdConsumption, tdProduction, tdBuffer, tdBlock, tdUpdate, tdDelete, trEnd)
+                    $("#users").append(trStart, tdUserName, tdRole, tdStatus, tdConsumption, tdProduction, tdBuffer, tdBlackedout, tdBlock, tdUpdate, tdDelete, trEnd)
                 }
             }
         }

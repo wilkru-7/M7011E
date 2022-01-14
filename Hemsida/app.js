@@ -36,7 +36,7 @@ const market = database.collection('Market')
 
 //Create admin on deployment
 search("admin").then(dontExists => {
-    if(dontExists){
+    if (dontExists) {
         bcrypt.hash("hej", saltRounds, (err, hash) => {
             insert("admin", hash, true)
         })
@@ -197,34 +197,34 @@ app.post('/checkUpdateCredentials', (req, res) => {
 app.post('/login', (req, res) => {
     /* TODO:
         Check input so no hacking */
-        var username = req.body.username;
-        var password = req.body.password;
-        if (username != "" && password != "") {
-            login(username).then(result => {
-                if (result) {
-                    bcrypt.compare(password, result.password, function (err, response) {
-                        if (err) {
-                            // handle error
-                        }
-                        if (response) {
-                            // Send JWT
-                            req.session.loggedin = true;
-                            console.log("result: " + result.role)
-                            req.session.role = result.role;
-                            req.session.username = username;
-                            loginDB(username)
-                            res.redirect('/')
-                        } else {
-                            res.redirect('login')
-                        }
+    var username = req.body.username;
+    var password = req.body.password;
+    if (username != "" && password != "") {
+        login(username).then(result => {
+            if (result) {
+                bcrypt.compare(password, result.password, function (err, response) {
+                    if (err) {
+                        // handle error
+                    }
+                    if (response) {
+                        // Send JWT
+                        req.session.loggedin = true;
+                        console.log("result: " + result.role)
+                        req.session.role = result.role;
+                        req.session.username = username;
+                        setStatusUser(username, "Online")
+                        res.redirect('/')
+                    } else {
+                        res.redirect('login')
+                    }
                 });
-                } else {
-                    res.redirect('/login')
-                }
-            })
-        } else {
-            res.redirect('/login')
-        }
+            } else {
+                res.redirect('/login')
+            }
+        })
+    } else {
+        res.redirect('/login')
+    }
 })
 
 app.post('/redirectregister', (req, res) => {
@@ -237,7 +237,7 @@ app.post('/redirectlogin', (req, res) => {
 
 app.get('/logout', (req, res) => {
     req.session.loggedin = false
-    logoutDB(req.session.username)
+    setStatusUser(req.session.username, "Offline")
     res.redirect('/login')
 })
 
@@ -385,12 +385,12 @@ app.listen(port, () => {
 
 async function insert(_username, _password, admin) {
     const token = generateAccessToken({ username: _username })
-    if(!admin){
+    if (!admin) {
         var insert = { username: _username, password: _password, buffer: 0, ratio1: 0.5, ratio2: 0.5, blocked: false, role: "prosumer", token: token };
-    }else{
+    } else {
         var insert = { username: _username, password: _password, buffer: 0, ratio1: 0.5, ratio2: 0.5, blocked: false, role: "manager", token: token };
     }
-    
+
 
     const result = await users.insertOne(insert);
     return token
@@ -506,23 +506,12 @@ async function search(_username) {
         return false
     }
 }
-async function loginDB(_username) {
+async function setStatusUser(_username, status) {
     const filter = { username: _username };
     const options = { upsert: true };
     const updateDoc = {
         $set: {
-            status: "Online"
-        },
-    };
-    const result = await users.updateOne(filter, updateDoc, options);
-    return result;
-}
-async function logoutDB(_username) {
-    const filter = { username: _username };
-    const options = { upsert: true };
-    const updateDoc = {
-        $set: {
-            status: "Offline"
+            status: status
         },
     };
     const result = await users.updateOne(filter, updateDoc, options);

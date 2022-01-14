@@ -67,6 +67,11 @@ async function updateConsumption(consumer) {
     consumer.consumption = consumptionDistribution.ppf(Math.random()).toFixed(2);
     insertConsumption(consumer.username, consumer.consumption)
 }
+function updateConsumptionTest() {
+    return consumptionDistribution.ppf(Math.random()).toFixed(2);
+}
+
+module.exports = updateConsumptionTest;
 
 async function insertConsumption(_username, value) {
     const filter = { username: _username };
