@@ -1,6 +1,11 @@
+# Welcome
+## Here follows simple instructions to run our projet, for more detail see "M7011E Repord.pdf"
+
 # Steps to build and run the project
 
-## 1. Build all the containers by running the following command in the respective folder
+## 1. Switch to the branch named "Docker".
+
+## 2. Build all the containers by running the following command in the respective folder
  - `docker build -t buffer .`
  - `docker build -t consumption .`
  - `docker build -t modelledprice .`
@@ -10,7 +15,7 @@
  - `docker build -t producer .`
  - `docker build -t hemsida .`
 
-## 2. Deploy the application by running the following command in the deployment folder.
+## 3. Deploy the application by running the following command in the deployment folder.
  - `docker-compose up`
 
 # Steps do update services
