@@ -1,16 +1,18 @@
-const getWindSpeed = require("./windSpeed.js");
+const getWindSpeedTest = require("./windSpeed.js");
 test("Check sanity of wind speed values", () => {
-    for(var i = 0; i < 100; i++) {
-        var data = parseFloat(getWindSpeed())
-        expect(data).toBeLessThanOrEqual(10);
-        expect(data).toBeGreaterThanOrEqual(0);
+    var testValue = 0;
+    for (var i = 0; i < 100; i++) {
+        var data = parseFloat(getWindSpeedTest())
+        testValue += data;
     }
+    testValue = testValue / 100
+    expect(testValue).toBeLessThanOrEqual(10);
+    expect(testValue).toBeGreaterThanOrEqual(2);
 });
 
 test("Check change of wind speed values", async () => {
-    var data1 = parseFloat(getWindSpeed())
-    await new Promise(resolve => setTimeout(resolve, 5000));
-    var data2 = parseFloat(getWindSpeed())
+    var data1 = parseFloat(getWindSpeedTest())
+    var data2 = parseFloat(getWindSpeedTest())
     expect(data2).not.toBe(data1);
 });
 

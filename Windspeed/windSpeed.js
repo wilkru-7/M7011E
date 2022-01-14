@@ -21,11 +21,20 @@ app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`)
 })
 
+/* const getWindSpeed = () => {
+    return windSpeed;
+}; */
 function getWindSpeed() {
     return windSpeed;
 };
-
-module.exports = getWindSpeed
+function getWindSpeedTest() {
+    updatePerDay()
+    updatePerHour()
+    var windSpeed = getWindSpeed()
+    return windSpeed;
+};
+module.exports = getWindSpeedTest
+/* exports.getWindSpeed = getWindSpeed(); */
 
 function updatePerHour() {
     windSpeed = distributionDay.ppf(Math.random()).toFixed(2);
