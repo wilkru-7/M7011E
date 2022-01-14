@@ -25,6 +25,8 @@ function getWindSpeed() {
     return windSpeed;
 };
 
+module.exports = getWindSpeed
+
 function updatePerHour() {
     windSpeed = distributionDay.ppf(Math.random()).toFixed(2);
 };
